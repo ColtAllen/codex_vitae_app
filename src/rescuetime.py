@@ -2,30 +2,22 @@ import os
 import json
 import requests
 import logging
-
-# from datetime import date
-# from dateutil import relativedelta
-
 import pandas as pd
 
 
-
 def rescuetime_get_daily(KEY):
-    """Use the RescueTime API to get daily totals for time spent on personal digital devices.
-    Args:
-        KEY: RescueTime API Key.
-    Returns:
-        rescuetime_dict: A dictionary of days and total, productive, distracting, and neutral hours.
-
-    """
+    """Use the RescueTime API to get daily totals for the past two weeks of time spent on personal digital devices.
     
-    # Consider only querying for yesterday in the future. For now we are returning the past two weeks.
-    #yesterday = str(date.today()-relativedelta.relativedelta(days=1))
-    #assert(iter_result[0].get('date')== yesterday)
+    Arguments:
+        KEY: RescueTime API Key.
+
+    Returns:
+        rescuetime_dict: Dictionary of total, productive, distracting, and neutral hours by day.
+    """
 
     url = f'https://www.rescuetime.com/anapi/daily_summary_feed?key={KEY}'
 
-    r = requests.get(url) # Make Request
+    r = requests.get(url)
     iter_result = r.json()
 
     rescuetime_dict = {}
@@ -49,14 +41,9 @@ if __name__ == '__main__':
 
     logger = logging.getLogger(__name__)
 
-    os.chdir('/mnt/c/Users/colta/portfolio/codex_vitae_app/config')
+    KEY = os.getenv('KEY')
 
-    with open("rescuetime_cred.json", "r") as file:
-        credentials = json.load(file)
-        KEY = credentials.get('rescuetime').get('KEY')
-
+    # Create a Pandas dataframe from the RescueTime data and print dataframe information to the console.
     rescuetime_dict = rescuetime_get_daily(KEY)
-
     rescuetime_dict = pd.DataFrame(rescuetime_dict)
-
     logger.info(rescuetime_dict.info())
