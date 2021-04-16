@@ -1,7 +1,10 @@
 from __future__ import print_function
 import os
-from email.header import Header, decode_header, make_header
 import base64
+import json
+import requests
+import logging
+
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -9,6 +12,8 @@ from google.oauth2.credentials import Credentials
 
 from datetime import date
 from dateutil import relativedelta
+
+
 
 
 def authenticate_email_api_local():
@@ -91,14 +96,32 @@ def get_email_bodies(service, query):
         
     return decoded_list
 
-if __name__ == '__main__':
 
-    # Search the last two weeks of emails for MyNetDiary nutrition reports.
-    date_ = str(date.today()-relativedelta.relativedelta(days=14))
-    service = authenticate_email_api_local()
-    mynetdiary = get_email_bodies(service,query=f"from:no-reply@mynetdiary.net,after:{date_}")
+def rescuetime_get_daily(KEY):
+    """Use the RescueTime API to get daily totals for the past two weeks of time spent on personal digital devices.
+    
+    Arguments:
+        KEY: RescueTime API Key.
 
-    #Confirm two weekly reports were returned.
-    assert(len(mynetdiary) == 2)
+    Returns:
+        rescuetime_tuple: List of tuples containing daily total, productive, distracting, and neutral hours.
+    """
+
+    url = f'https://www.rescuetime.com/anapi/daily_summary_feed?key={KEY}'
+
+    r = requests.get(url)
+    iter_result = r.json()
+
+    days = [day.get('date') for day in iter_result]
+    all_hours = [day.get('total_hours') for day in iter_result]
+    prod_hours = [day.get('all_productive_hours') for day in iter_result]
+    dist_hours = [day.get('all_distracting_hours') for day in iter_result]
+    neut_hours = [day.get('neutral_hours') for day in iter_result]
+
+    rescuetime_tuple = [(day,a,p,d,n) for (day,a,p,d,n) in zip(days, all_hours,prod_hours,dist_hours,neut_hours)]
+
+    return rescuetime_tuple
+
+
     
     
