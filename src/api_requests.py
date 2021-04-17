@@ -14,9 +14,7 @@ from datetime import date
 from dateutil import relativedelta
 
 
-
-
-def authenticate_email_api_local():
+def authenticate_email_api():
     """Authenticate email API from credentials stored in a local JSON file.
 
     Returns:
@@ -47,7 +45,7 @@ def authenticate_email_api_local():
 
     return service
 
-def get_email_bodies(service, query):
+def get_email_content(service, query):
     """Use the GMail API to query email bodies and decode into string format.
 
     Arguments:
@@ -93,11 +91,13 @@ def get_email_bodies(service, query):
     del body_list
     decoded_list = [base64.urlsafe_b64decode(x) for x in bytes_list]
     del bytes_list
+    str_list = [str(x) for x in decoded_list]
+    del decoded_list
         
-    return decoded_list
+    return str_list
 
 
-def rescuetime_get_daily(KEY):
+def get_rescuetime_daily(KEY):
     """Use the RescueTime API to get daily totals for the past two weeks of time spent on personal digital devices.
     
     Arguments:
