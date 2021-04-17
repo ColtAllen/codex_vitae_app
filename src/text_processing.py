@@ -1,28 +1,32 @@
+import datetime
 import re
+from dateutil.parser import parse
 
 class reMarkableParsing:
-    """Extract date, mood rating, and journal entry from raw email bodies.
-    
-    Attributes:
-        text: A string of journal entry text to process.
-    
-    """
+    """Extract date, mood rating, and journal entry from raw email bodies."""
 
-    def __init__(self, text=None):
-        """Inits reMarkableParsing class with journal entry."""
-        self.text = text
+    def __init__(self, text_list: list):
+        """Inits reMarkableParsing class with text_list.
 
-    def clean_journal_entry(self):
+        Args:
+            text_list: List of strings containing raw emails to be processed.
+        """
+        self.text_list = text_list
+
+    @staticmethod
+    def clean_emails(text: str) -> str:
         """Removes HTML and CSS syntax, line breaks, and footer from journal entries.
-        Arguments:
-            text: str of raw journal entry text.
+
+        Args:
+            text: A string of raw email text.
+
         Returns:
-            clean_text: str of clean text data.
+            clean_text: A string of clean text data.
         """
 
         # Remove HTML tags
         tag_re = re.compile(r'<[^>]+>')
-        text = tag_re.sub('', self.text)
+        text = tag_re.sub('', text)
         # Remove line breaks
         text = text.replace("\\r\\n","")
         # Remove apostrophe breaks
@@ -34,49 +38,77 @@ class reMarkableParsing:
 
         return clean_text
 
-    def mood_rating(self):
+    @staticmethod
+    def mood_rating(text: str) -> float:
         """Extracts mood rating from journal entry, accounting for spacing inconsistencies.
-        Arguments:
-            text: str containing mood rating.
+
+        Args:
+            text: A string of cleaned text containing mood rating.
+
         Returns:
             rating: Mood rating as a float.
         """
 
-        clean_text = clean_journal_entry(self.text)
-
         try:
             p = re.compile(r'Mood: \d')
-            rating =  float(p.search(clean_text).group().split(":")[1])
+            rating =  float(p.search(text).group().split(":")[1])
         except AttributeError:
             p = re.compile(r'Mood:\d')
-            rating =  float(p.search(clean_text).group().split(":")[1])
+            rating =  float(p.search(text).group().split(":")[1])
 
         return rating
-        
-    def journal_date(self):
+
+    @staticmethod
+    def journal_date(text: str):
         """Extracts date of journal entry and converts to datetime format.
-        Arguments:
-            text: str containing date.
+
+        Args:
+            text: A string of cleaned text containing date.
         Returns:
             date: Date as datetime type.
         """
-        clean_text = clean_journal_entry(self.text)
 
-        date_ = parse(clean_text.split("Mood")[0]).date()
+        date_ = parse(text.split("Mood")[0]).date()
 
         return date_
 
-    def journal_entry(self):
+    @staticmethod
+    def journal_entry(text: str) -> str:
         """Extracts journal entry from cleaned text.
-        Arguments:
-            text: str of clean text.
-        Returns:
-            entry: str of journal entry.
-        """
-        clean_text = clean_journal_entry(self.text)
 
-        entry = str(clean_text.split(":")[1])[2:]
+        Arguments:
+            text: A string of cleaned text.
+        Returns:
+            entry: A string of journal entry.
+        """
+
+        entry = str(text.split(":")[1])[2:]
 
         return entry
+    
+    def run(self) -> list:
+        """Arranges all journal data in format required for database insertion.
+
+        Returns: 
+            journal_tuples: List of tuples sorted by date containing parsed journal data.
+        """
+
+        # Emails containing PDF attachments instead of text must be removed.
+        for entry in self.text_list:
+            if entry == "b'6\\x89\\xde'":
+                self.text_list.remove(entry)
+
+        clean_text = [self.clean_emails(entry) for entry in self.text_list]
+        mood = [self.mood_rating(entry) for entry in clean_text]
+        date_ = [self.journal_date(entry) for entry in clean_text]
+        journal = [self.journal_entry(entry) for entry in clean_text]
+
+        journal_tuples = [(day,m,j) for (day,m,j) in zip(date_, mood,journal)]
+        journal_tuples = sorted(journal_tuples,key=lambda x: x[0])
+
+        return journal_tuples
+
+
+
 
 
