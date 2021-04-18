@@ -1,17 +1,21 @@
-import datetime
 import re
 from dateutil.parser import parse
+
+from datetime import date
+from dateutil.relativedelta import relativedelta
+
+import pandas as pd
 
 class reMarkableParsing:
     """Extract date, mood rating, and journal entry from raw email bodies."""
 
-    def __init__(self, text_list: list):
+    def __init__(self, email_list: list):
         """Inits reMarkableParsing class with text_list.
 
         Args:
             text_list: List of strings containing raw emails to be processed.
         """
-        self.text_list = text_list
+        self.email_list = email_list
 
     @staticmethod
     def clean_emails(text: str) -> str:
@@ -94,11 +98,11 @@ class reMarkableParsing:
         """
 
         # Emails containing PDF attachments instead of text must be removed.
-        for entry in self.text_list:
+        for entry in self.email_list:
             if entry == "b'6\\x89\\xde'":
-                self.text_list.remove(entry)
+                self.email_list.remove(entry)
 
-        clean_text = [self.clean_emails(entry) for entry in self.text_list]
+        clean_text = [self.clean_emails(entry) for entry in self.email_list]
         mood = [self.mood_rating(entry) for entry in clean_text]
         date_ = [self.journal_date(entry) for entry in clean_text]
         journal = [self.journal_entry(entry) for entry in clean_text]
@@ -107,6 +111,115 @@ class reMarkableParsing:
         journal_tuples = sorted(journal_tuples,key=lambda x: x[0])
 
         return journal_tuples
+
+
+def fitness_parsing(email_list: list) -> list:
+    """Use Pandas functions to parse fitness data from MyNetDiary emails for database insertion.
+
+    Arguments:
+        email_list: List of strings containing raw HTML from MyNetDiary emails.
+    Returns:
+        fitness_tuples: List of tuples containing pertinent fitness data.
+    """
+
+    df_list = []
+
+    for email_ in email_list:
+
+        # Get substring of Fitness table.
+        fitness_table = email_.split("Measurements")[1].replace("\\r\\n","").split("Nutrition")[0]
+        fitness_df = pd.read_html(fitness_table)[0]
+
+        # Fix mislabled sleep data columns and add a REM sleep column.
+        fitness_df['Deep Sleep'] = fitness_df['Awakes,']
+        fitness_df['Awakes'] = fitness_df['Deep Sleep,']
+        fitness_df['REM Sleep'] = fitness_df['Sleep,'] - fitness_df['Deep Sleep'] - fitness_df['Light Sleep,']
+
+        # Select pertinent columns and append to df list for concatenation.
+        fitness_df = fitness_df[[
+            'Date', 
+            'Weight, lbs', 
+            'BMR, cals',
+            'Pulse,', 
+            'Sleep,',
+            'Deep Sleep', 
+            'Light Sleep,',
+            'REM Sleep',
+            'Awakes',
+            'Daily Steps,',
+            'Calories Out, cals'
+            ]]
+
+        df_list.append(fitness_df)
+
+    fitness_df = pd.concat(df_list,axis=0)
+    
+    # Convert dataframe into list of tuples.
+    fitness_tuples = list(fitness_df.itertuples(index=False,name=None))
+
+    return fitness_tuples
+
+
+def nutrition_parsing(email_list: list) -> list:
+    """Use Pandas functions to parse nutrition data from MyNetDiary emails for database insertion.
+
+    Arguments:
+        email_list: List of strings containing raw HTML from MyNetDiary emails.
+    Returns:
+        nutrition_tuples: List of tuples containing pertinent fitness data.
+    """
+
+    df_list = []
+
+    for email_ in email_list:
+
+        # Get substring of Nutrition table.
+        nutrition_table = email_.split("Measurements")[1].replace("\\r\\n","").split("Nutrition")[1].split("Activities")[0]
+
+        # Find the indices of the days of the week for date assignments.
+        mon_idx = nutrition_table.find('Monday')
+        tue_idx = nutrition_table.find('Tuesday')
+        wed_idx = nutrition_table.find('Wednesday')
+        thu_idx = nutrition_table.find('Thursday')
+        fri_idx = nutrition_table.find('Friday')
+        sat_idx = nutrition_table.find('Saturday')
+        sun_idx = nutrition_table.find('Sunday')
+
+        day_find = [mon_idx,tue_idx,wed_idx,thu_idx,fri_idx,sat_idx,sun_idx]
+
+        # Find date strings in HTML table and format as dates.
+        date_list = [parse(nutrition_table[day:].split("</span")[0]).date() for day in day_find if day != -1]
+
+        # Revert to previous year for NYE week.
+        date_list = [(day - relativedelta(years=1) if date.today().strftime("%m%d") < day.strftime("%m%d") else day) for day in date_list]
+
+        nutrition_df = pd.read_html(nutrition_table,parse_dates=True,header=1)
+
+        # Retrieve rows containing daily totals.
+        nutrition_df = nutrition_df[0][nutrition_df[0]['Unnamed: 0'].isnull()].reset_index()
+        nutrition_df['Date'] = date_list
+
+        # Select pertinent columns and append to df list for concatenation.
+        nutrition_df = nutrition_df[[
+            'Date',
+            'Calories',
+            'Total Fat,\xa0g',
+            'Total Carbs,\xa0g',
+            'Protein,\xa0g',
+            'Trans Fat,\xa0g',
+            'Saturated Fat,\xa0g',
+            'Sodium,\xa0mg',
+            'Net Carbs,\xa0g',
+            'Dietary Fiber,\xa0g',
+            ]]
+        
+        df_list.append(nutrition_df)
+
+    nutrition_df = pd.concat(df_list,axis=0)
+
+    nutrition_tuples = list(nutrition_df.itertuples(index=False,name=None))
+
+    return nutrition_tuples
 
 
 

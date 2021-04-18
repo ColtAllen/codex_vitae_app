@@ -11,7 +11,7 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 
 from datetime import date
-from dateutil import relativedelta
+from dateutil.relativedelta import relativedelta
 
 
 def authenticate_email_api():
@@ -48,9 +48,9 @@ def authenticate_email_api():
 def get_email_content(service, query):
     """Use the GMail API to query email bodies and decode into string format.
 
-    Arguments:
+    Args:
         service: GMail API service object.
-        query: string containing GMail search syntax.
+        query: A string containing GMail search syntax.
     
     Returns:
         decoded_list: A list of email bodies.
@@ -100,7 +100,7 @@ def get_email_content(service, query):
 def get_rescuetime_daily(KEY):
     """Use the RescueTime API to get daily totals for the past two weeks of time spent on personal digital devices.
     
-    Arguments:
+    Args:
         KEY: RescueTime API Key.
 
     Returns:
@@ -113,12 +113,11 @@ def get_rescuetime_daily(KEY):
     iter_result = r.json()
 
     days = [day.get('date') for day in iter_result]
-    all_hours = [day.get('total_hours') for day in iter_result]
     prod_hours = [day.get('all_productive_hours') for day in iter_result]
     dist_hours = [day.get('all_distracting_hours') for day in iter_result]
     neut_hours = [day.get('neutral_hours') for day in iter_result]
 
-    rescuetime_tuple = [(day,a,p,d,n) for (day,a,p,d,n) in zip(days, all_hours,prod_hours,dist_hours,neut_hours)]
+    rescuetime_tuple = [(day,p,d,n) for (day,p,d,n) in zip(days,prod_hours,dist_hours,neut_hours)]
 
     return rescuetime_tuple
 
