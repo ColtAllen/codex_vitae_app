@@ -9,14 +9,6 @@ import pandas as pd
 class reMarkableParsing:
     """Extract date, mood rating, and journal entry from raw email bodies."""
 
-    def __init__(self, email_list: list):
-        """Inits reMarkableParsing class with text_list.
-
-        Args:
-            text_list: List of strings containing raw emails to be processed.
-        """
-        self.email_list = email_list
-
     @staticmethod
     def clean_emails(text: str) -> str:
         """Removes HTML and CSS syntax, line breaks, and footer from journal entries.
@@ -90,19 +82,20 @@ class reMarkableParsing:
 
         return entry
     
-    def run(self) -> list:
+    def run(self, email_list: list) -> list:
         """Arranges all journal data in format required for database insertion.
 
-        Returns: 
+        Returns:
+            email_list: A list of strings containing raw emails to be processed.
             journal_tuples: List of tuples sorted by date containing parsed journal data.
         """
 
         # Emails containing PDF attachments instead of text must be removed.
-        for entry in self.email_list:
+        for entry in email_list:
             if entry == "b'6\\x89\\xde'":
-                self.email_list.remove(entry)
+                email_list.remove(entry)
 
-        clean_text = [self.clean_emails(entry) for entry in self.email_list]
+        clean_text = [self.clean_emails(entry) for entry in email_list]
         mood = [self.mood_rating(entry) for entry in clean_text]
         date_ = [self.journal_date(entry) for entry in clean_text]
         journal = [self.journal_entry(entry) for entry in clean_text]

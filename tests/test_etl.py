@@ -1,9 +1,11 @@
-from unittest import  TestCase
+from unittest import TestCase
+from unittest import mock
 
 class ETLMethodTestCase(TestCase):
     def setUp(self):
         pass
 
+    @mock.patch
     def test_(self):
         """
         GIVEN

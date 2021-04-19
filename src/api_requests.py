@@ -109,15 +109,18 @@ def get_rescuetime_daily(KEY):
 
     url = f'https://www.rescuetime.com/anapi/daily_summary_feed?key={KEY}'
 
-    r = requests.get(url)
-    iter_result = r.json()
+    with requests.Session() as s:
+        r = s.get(url)
+        iter_result = r.json()
 
-    days = [day.get('date') for day in iter_result]
-    prod_hours = [day.get('all_productive_hours') for day in iter_result]
-    dist_hours = [day.get('all_distracting_hours') for day in iter_result]
-    neut_hours = [day.get('neutral_hours') for day in iter_result]
+        days = [day.get('date') for day in iter_result]
+        prod_hours = [day.get('all_productive_hours') for day in iter_result]
+        dist_hours = [day.get('all_distracting_hours') for day in iter_result]
+        neut_hours = [day.get('neutral_hours') for day in iter_result]
 
-    rescuetime_tuple = [(day,p,d,n) for (day,p,d,n) in zip(days,prod_hours,dist_hours,neut_hours)]
+        rescuetime_tuple = [(day,p,d,n) for (day,p,d,n) in zip(days,prod_hours,dist_hours,neut_hours)]
+
+        s.close()
 
     return rescuetime_tuple
 
