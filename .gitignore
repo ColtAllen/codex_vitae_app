@@ -5,4 +5,7 @@
 /exist_extract_mood_chart.html
 /notebooks
 /tutorials
-remarkable_rescuetime.ipynb
+api_wrangling.ipynb
+codex_vitae_backcast.ipynb
+mood_markov.ipynb
+mynetdiary_parsing.ipynb
