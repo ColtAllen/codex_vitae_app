@@ -3,12 +3,6 @@ import json
 import pandas as pd
 
 
-
-
-
-
-os.chdir(os.getenv['PATH'])
-
 def exist_dataframes(var_list, year):
     """
     Create a Pandas DF from a list of Exist json files.
@@ -42,8 +36,14 @@ def exist_dataframes(var_list, year):
 
     return dataframe
 
+
+
     
 if __name__ == '__main__':
+
+    def create_db_tables("/mnt/c/Users/colta/portfolio/codex_vitae_app/data/testdb.sqlite")
+
+    os.chdir(os.getenv['PATH'])
 
     # Specify years of data to retrieve as a list:
     year_list = ['2020', '2021']
@@ -75,9 +75,9 @@ if __name__ == '__main__':
             'writing',
             ]
 
-    journal = ['mood','mood_note']
+    journal = ['mood','journal']
 
-    productivity = ['productive_min','distracting_min','neutral_min']
+    productivity = ['prod_hours','dist_hours','neut_hours']
 
     fitness = ['active_energy',
                 'heartrate',
@@ -104,15 +104,34 @@ if __name__ == '__main__':
         df[df['Effective Date'] < '2020-04-06']
         df_list.append(df)
 
+    
+
+
     #SQLite Tuple conversions Go HERE
     df_list[0] = exist_tags
     df_list[1] = exist_journal # scale 1-9
-    df_list[2] = exist_productivity # convert min to hours
+    df_list[2] = exist_rescuetime # convert min to hours
+    df_list[3] = exist_garmin
+
+    # Convert dataframe into list of tuples.
+    exist_tags= to_tuple_list(df_list[0])
+    exist_journal = to_tuple_list(df_list[1])
+    exist_rescuetime = to_tuple_list(df_list[2])
+    exist_garmin = to_tuple_list(df_list[3])
+
+    mood_charts = pd.read_csv('mood_charts.csv')
+    mood_charts.columns = [Date,Mood,Sleep,Cardio,Meditate,Mood_Note] #scale mood 1-7
+    bullet_journal = pd.read_csv('bullet_journal.csv')
+    bullet_journal.columns - [Date,Mood,Sleep,Steps,Cardio,Meditate,Mood_Note,Fasting,Cheat Meals,Read,Draw,Learn,Write,Guitar] #scale mood 1-5
+
+
     df_list[3] = exist_fitness
         
 
  
     
+
+
 
 
     # Search the last two weeks of emails for MyNetDiary nutrition reports.
