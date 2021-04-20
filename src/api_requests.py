@@ -18,8 +18,11 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 
 
-def authenticate_gmail_api():
+def authenticate_gmail_api(credentials):
     """Authenticate email API from credentials stored in a local JSON file.
+
+    Args:
+        credentials: A string containing the filepath to the API credentials. 
 
     Returns:
         API service object.
@@ -49,7 +52,7 @@ def authenticate_gmail_api():
 
     return service
 
-def get_email_content(service, query):
+def get_email_content(service, query = None):
     """Use the GMail API to query email bodies and decode into string format.
 
     Args:
@@ -65,12 +68,10 @@ def get_email_content(service, query):
     emails = emails.get('messages')
 
     id_list = [id['id'] for id in emails]
-    del emails
 
     body_list = []
 
     # Check for container MIME message parts.
-
     body = service.users().messages().get(userId='me',id=id_list[0]).execute().get('payload').get('body').get('data')
 
     if body == None:
@@ -79,8 +80,6 @@ def get_email_content(service, query):
             text = body[0].get('body').get('data')
             html = body[1].get('body').get('data')
             body = tuple((text,html))
-            #del text
-            #del html
             body_list.append(html)
         
     else:
@@ -88,15 +87,9 @@ def get_email_content(service, query):
             body = service.users().messages().get(userId='me',id=email).execute().get('payload').get('body').get('data')
             body_list.append(body)
 
-    del id_list
-    del body
-
     bytes_list = [bytes(str(x),encoding='utf-8') for x in body_list]
-    del body_list
     decoded_list = [base64.urlsafe_b64decode(x) for x in bytes_list]
-    del bytes_list
     str_list = [str(x) for x in decoded_list]
-    del decoded_list
         
     return str_list
 
