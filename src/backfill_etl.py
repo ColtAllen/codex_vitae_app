@@ -1,6 +1,18 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import os
+import contextlib
 import json
+
+from datetime import date
+from dateutil.relativedelta import relativedelta
+
 import pandas as pd
+
+from db_module import to_tuple_list
+from api_requests import authenticate_gmail_api, get_email_content, get_rescuetime_daily
 
 
 def exist_dataframes(var_list, year):
@@ -31,6 +43,7 @@ def exist_dataframes(var_list, year):
         try:
             dataframe = dataframe.merge(df,on='date',how='outer')
 
+        # TODO specify exception.
         except:
             dataframe = pd.DataFrame(df).rename(columns={"value": json_list.split(".")[0]})
 
@@ -41,9 +54,10 @@ def exist_dataframes(var_list, year):
     
 if __name__ == '__main__':
 
-    def create_db_tables("/mnt/c/Users/colta/portfolio/codex_vitae_app/data/testdb.sqlite")
+    #create_db_tables("/mnt/c/Users/colta/portfolio/codex_vitae_app/data/testdb.sqlite")
 
-    os.chdir(os.getenv['PATH'])
+    #os.chdir(os.getenv['PATH'])
+    os.chdir('/mnt/c/Users/colta/portfolio/codex_vitae_app/data/exist_full_extract')
 
     # Specify years of data to retrieve as a list:
     year_list = ['2020', '2021']
@@ -77,7 +91,7 @@ if __name__ == '__main__':
 
     journal = ['mood','journal']
 
-    productivity = ['prod_hours','dist_hours','neut_hours']
+    productivity = ['productive_min','distracting_min','neutral_min']
 
     fitness = ['active_energy',
                 'heartrate',
@@ -101,17 +115,17 @@ if __name__ == '__main__':
         df = pd.concat(df_years,axis=0)
         df['date'] = pd.to_datetime(df['date'])
         # df = df.sort_values(by='date',axis=0)
-        df[df['Effective Date'] < '2020-04-06']
+        df[df['date'] < '2020-04-06'] #raised KeyError
         df_list.append(df)
 
     
 
 
     #SQLite Tuple conversions Go HERE
-    df_list[0] = exist_tags
-    df_list[1] = exist_journal # scale 1-9
-    df_list[2] = exist_rescuetime # convert min to hours
-    df_list[3] = exist_garmin
+    exist_tags = df_list[0]
+    exist_journal = df_list[1] # scale 1-9
+    exist_rescuetime = df_list[2] # convert min to hours
+    exist_garmin = df_list[3]
 
     # Convert dataframe into list of tuples.
     exist_tags= to_tuple_list(df_list[0])
@@ -119,41 +133,18 @@ if __name__ == '__main__':
     exist_rescuetime = to_tuple_list(df_list[2])
     exist_garmin = to_tuple_list(df_list[3])
 
+    os.chdir('/mnt/c/Users/colta/portfolio/codex_vitae_app/data')
+
     mood_charts = pd.read_csv('mood_charts.csv')
-    mood_charts.columns = [Date,Mood,Sleep,Cardio,Meditate,Mood_Note] #scale mood 1-7
+    #mood_charts.columns = [Date,Mood,Sleep,Cardio,Meditate,Mood_Note] #scale mood 1-7
     bullet_journal = pd.read_csv('bullet_journal.csv')
-    bullet_journal.columns - [Date,Mood,Sleep,Steps,Cardio,Meditate,Mood_Note,Fasting,Cheat Meals,Read,Draw,Learn,Write,Guitar] #scale mood 1-5
-
-
-    df_list[3] = exist_fitness
-        
-
- 
+    #bullet_journal.columns - [Date,Mood,Sleep,Steps,Cardio,Meditate,Mood_Note,Fasting,Cheat Meals,Read,Draw,Learn,Write,Guitar] #scale mood 1-5
     
-
-
-
-
+    os.chdir('/mnt/c/Users/colta/portfolio/codex_vitae_app/config')
     # Search the last two weeks of emails for MyNetDiary nutrition reports.
-    date_ = str(date.today()-relativedelta.relativedelta(days=14))
-    service = authenticate_email_api_local()
-    mynetdiary = get_email_bodies(service,query=f"from:no-reply@mynetdiary.net,after:{date_}")
+    date_ = str(date.today()-relativedelta(days=14))
+    service = authenticate_gmail_api()
+    mynetdiary = get_email_content(service,query=f"from:no-reply@mynetdiary.net,after:{date_}")
 
     #Confirm two weekly reports were returned.
-    assert(len(mynetdiary) == 2)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    dir() #displays all attributes of an object
+    assert(len(mynetdiary) == 3)

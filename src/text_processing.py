@@ -1,3 +1,7 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import re
 from dateutil.parser import parse
 
@@ -9,8 +13,7 @@ import pandas as pd
 class reMarkableParsing:
     """Extract date, mood rating, and journal entry from raw email bodies."""
 
-    @staticmethod
-    def clean_emails(text: str) -> str:
+    def clean_emails(self, text: str) -> str:
         """Removes HTML and CSS syntax, line breaks, and footer from journal entries.
 
         Args:
@@ -34,8 +37,7 @@ class reMarkableParsing:
 
         return clean_text
 
-    @staticmethod
-    def mood_rating(text: str) -> float:
+    def mood_rating(self, text: str) -> float:
         """Extracts mood rating from journal entry, accounting for spacing inconsistencies.
 
         Args:
@@ -54,8 +56,7 @@ class reMarkableParsing:
 
         return rating
 
-    @staticmethod
-    def journal_date(text: str):
+    def journal_date(self, text: str):
         """Extracts date of journal entry and converts to datetime format.
 
         Args:
@@ -68,8 +69,7 @@ class reMarkableParsing:
 
         return date_
 
-    @staticmethod
-    def journal_entry(text: str) -> str:
+    def journal_entry(self, text: str) -> str:
         """Extracts journal entry from cleaned text.
 
         Arguments:

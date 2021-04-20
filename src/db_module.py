@@ -1,7 +1,10 @@
-import sqlite3
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
-'''THIS IS THE .PY FILE IN THE ABOVE CELL'''
-#from db_utils import db_connect
+import contextlib
+
+import sqlite3
 
 def create_db_tables(db_path):
     """Create all SQLite tables.
@@ -68,7 +71,8 @@ def insert_rescuetime(db_path, sql):
     con.row_factory = sqlite3.Row
 
     with con:
-            con.executemany(sql,(row[0],row_generator())
+            con.executemany(sql,(row[0],row_generator()))
+    
     con.close()
     return cur.lastrowid
 

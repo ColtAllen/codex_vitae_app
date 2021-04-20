@@ -1,20 +1,24 @@
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
+
 import os
+import logging
 import base64
+import contextlib
 import json
 import requests
-import logging
+
+from datetime import date
+from dateutil.relativedelta import relativedelta
 
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 
-from datetime import date
-from dateutil.relativedelta import relativedelta
 
-
-def authenticate_email_api():
+def authenticate_gmail_api():
     """Authenticate email API from credentials stored in a local JSON file.
 
     Returns:
