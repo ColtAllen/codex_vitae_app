@@ -53,6 +53,9 @@ class reMarkableParsing:
         except AttributeError:
             p = re.compile(r'Mood:\d')
             rating =  float(p.search(text).group().split(":")[1])
+        
+        finally:
+            pass
 
         return rating
 
@@ -181,7 +184,7 @@ def nutrition_parsing(email_list: list) -> list:
         day_find = [mon_idx,tue_idx,wed_idx,thu_idx,fri_idx,sat_idx,sun_idx]
 
         # Find date strings in HTML table and format as dates.
-        date_list = [parse(nutrition_table[day:].split("</span")[0]).date() for day in day_find if day != -1]
+        date_list = [parse(nutrition_table[day:].split("</span")[0]).date() for day in day_find if day is not -1]
 
         # Revert to previous year for NYE week.
         date_list = [(day - relativedelta(years=1) if date.today().strftime("%m%d") < day.strftime("%m%d") else day) for day in date_list]

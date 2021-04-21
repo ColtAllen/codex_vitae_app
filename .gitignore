@@ -9,3 +9,4 @@ api_wrangling.ipynb
 codex_vitae_backcast.ipynb
 mood_markov.ipynb
 mynetdiary_parsing.ipynb
+run_etl.sh

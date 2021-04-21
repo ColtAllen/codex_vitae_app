@@ -3,14 +3,10 @@ from __future__ import division
 from __future__ import print_function
 
 import os
-import logging
 import base64
-import contextlib
-import json
 import requests
 
-from datetime import date
-from dateutil.relativedelta import relativedelta
+from contextlib import closing
 
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -19,7 +15,7 @@ from google.oauth2.credentials import Credentials
 
 
 def authenticate_gmail_api(credentials):
-    """Authenticate email API from credentials stored in a local JSON file.
+    """Authenticate email API from credentials declared from an env variable.
 
     Args:
         credentials: A string containing the filepath to the API credentials. 
@@ -34,6 +30,7 @@ def authenticate_gmail_api(credentials):
     # The file token.json stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
     # time.
+    # TODO: Resolve contextlib closures once token and credentials are determined on GCP
     if os.path.exists('token.json'):
         creds = Credentials.from_authorized_user_file('token.json', SCOPE)
     # If there are no (valid) credentials available, let the user log in.
@@ -42,7 +39,7 @@ def authenticate_gmail_api(credentials):
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPE)
+                credentials, SCOPE)
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
         with open('token.json', 'w') as token:
@@ -106,8 +103,8 @@ def get_rescuetime_daily(KEY):
 
     url = f'https://www.rescuetime.com/anapi/daily_summary_feed?key={KEY}'
 
-    with requests.Session() as s:
-        r = s.get(url)
+    with closing(requests.Session()) as session:
+        r = session.get(url)
         iter_result = r.json()
 
         days = [day.get('date') for day in iter_result]
@@ -117,7 +114,7 @@ def get_rescuetime_daily(KEY):
 
         rescuetime_tuple = [(day,p,d,n) for (day,p,d,n) in zip(days,prod_hours,dist_hours,neut_hours)]
 
-        s.close()
+        session.close()
 
     return rescuetime_tuple
 

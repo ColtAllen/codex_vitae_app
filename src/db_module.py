@@ -2,7 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import contextlib
+from contextlib import closing
 
 import sqlite3
 
@@ -51,8 +51,8 @@ def create_db_tables(db_path):
 
     """)
 
-
     con.close()
+
 
 def row_generator(tuple_list):
     for tuple_ in tuple_list:
