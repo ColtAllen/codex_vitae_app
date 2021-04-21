@@ -128,7 +128,7 @@ def exist_dataframes(filepath):
 
 if __name__ == '__main__':
 
-    _df_list = exist_dataframes(os.getenv['PATH'])
+    _df_list = exist_dataframes(os.getenv('PATH'))
 
     # Convert dataframes into lists of tuples.
     _exist_tags = to_tuple_list(_df_list[0])
@@ -146,11 +146,11 @@ if __name__ == '__main__':
     _bullet_journal = to_tuple_list(_bullet_journal)
     # TODO: bullet_journal.columns - [Date,Mood,Sleep,Steps,Cardio,Meditate,Mood_Note,Fasting,Cheat Meals,Read,Draw,Learn,Write,Guitar] #scale mood 1-5
     
-    with authenticate_gmail_api(os.getenv['CREDENTIALS']) as service:
+    with authenticate_gmail_api(os.getenv('CREDENTIALS')) as service:
         _remarkable = get_email_content(service,query="from:my@remarkable.com")
         _mynetdiary = get_email_content(service,query="from:no-reply@mynetdiary.net")
     
-    with closing(open(os.getenv['API_KEY'], "r")) as file:
+    with closing(open(os.getenv('API_KEY'), "r")) as file:
         _credentials = json.load(file)
         _KEY = _credentials.get('rescuetime').get('KEY')
         _rescuetime_tuple = get_rescuetime_daily(_KEY)
