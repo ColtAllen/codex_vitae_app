@@ -128,7 +128,7 @@ def exist_dataframes(filepath):
 
 if __name__ == '__main__':
 
-    _df_list = exist_dataframes(os.getenv('PATH'))
+    _df_list = exist_dataframes(os.getenv('DIR'))
 
     # Convert dataframes into lists of tuples.
     _exist_tags = to_tuple_list(_df_list[0])
@@ -136,7 +136,7 @@ if __name__ == '__main__':
     _exist_rescuetime = to_tuple_list(_df_list[2]) # TODO convert min to hours in SQL insert statement
     _exist_garmin = to_tuple_list(_df_list[3])
 
-    os.chdir(os.getenv['PATH'])
+    os.chdir(os.getenv('DIR'))
 
     _mood_charts = pd.read_csv('mood_charts.csv')
     _mood_charts = to_tuple_list(_mood_charts)
