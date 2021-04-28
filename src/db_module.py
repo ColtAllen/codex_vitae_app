@@ -6,23 +6,19 @@ from contextlib import closing
 
 import sqlite3
 
-def create_db_tables(db_path):
-    """Create all SQLite tables.
+def db_create(db_path):
+    """Create all SQLite database tables and views.
 
     Args:
         db_path: A string containing the full directory and database name.
+    
+    Returns:
+        db_ver: A string containing the SQLite3 version.    
     """
 
     con = sqlite3.connect(db_path)
-    cur = con.cursor()
-    con.execute('SELECT SQLITE_VERSION()')
-    data = cur.fetchone()
-    print("SQLite version: %s" % data) 
-    cur.close()
 
-    #save a CREATE TABLE statement to a variable
-
-    #Create the table
+    #Create the database
     con.executescript("""
         DROP TABLE IF EXISTS rescuetime;
         DROP TABLE IF EXISTS remarkable;
@@ -167,47 +163,57 @@ def create_db_tables(db_path):
 
     """)
 
+    cur = con.cursor()
+    con.execute('SELECT SQLITE_VERSION()')
+    data = cur.fetchone()
+    db_ver = f"SQLite version: {data}"
     con.close()
 
-
-def row_generator(tuple_list):
-    for tuple_ in tuple_list:
-        yield (tuple_,)
+    return db_ver
 
 
-sql = """
-INSERT INTO rescuetime
-    (date, prod_hours, dist_hours, neut_hours)
-VALUES (?, ?, ?, ?)
-ON CONFLICT(date) DO UPDATE SET date = excluded.date
-"""
+def db_insert(db_path, tuple_gen, task):
+    """Insert data into SQLite3 DB tables.
 
-def insert_rescuetime(db_path, sql):
-    con = sqlite3.connect(db_path) 
+    Args:
+        db_path: A string containing the full directory and database name.
+        tuple_gen: list of generators containing data to be inserted.
+        type: 'refresh' to populate all tables, or 'weekly' for scheduled etl tasks.
+    """
+
+    on = sqlite3.connect(db_path) 
     con.row_factory = sqlite3.Row
 
-    with con:
-            con.executemany(sql,(row[0],row_generator()))
-    
-    con.close()
-    return cur.lastrowid
+    if task = 'refresh':
 
+        rt_sql = """
+        INSERT INTO rescuetime
+        (date, prod_hours, dist_hours, neut_hours)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(date) DO UPDATE SET date = excluded.date
+        """
 
-def insert_journal(journal_tuple):
-    con = sqlite3.connect("/mnt/c/Users/colta/portfolio/codex_vitae_app/data/testdb.sqlite") # connect to the database
-    cur = con.cursor() # instantiate a cursor obj to execute SQL statements
-    sql = """
+        journal_sql = """
         INSERT INTO journal
             (date, mood, entry)
         VALUES (?, ?, ?)
         ON CONFLICT(date) DO UPDATE SET date = excluded.date
         """
-    con.row_factory = sqlite3.Row
+
+    if task = 'weekly':
+
+        with con:
+            con.executemany(sql,(row[0],row_generator()))
+
+ 
     for row in journal_tuple:
         cur.execute(sql,(row[0],row[1],row[2]))
     con.close()
+    
+
     return cur.lastrowid
 
+# TODO: ROLL THESE INTO MYNETDIARY FUNCTIONS
 def to_tuple_list(df):
     """Convert a pandas DF into a list of tuples for database insertion.
 
@@ -221,3 +227,13 @@ def to_tuple_list(df):
     tuple_list = list(df.itertuples(index=False,name=None))
 
     return tuple_list
+
+
+def row_generator(tuple_list):
+    for tuple_ in tuple_list:
+        yield (tuple_,)
+
+    if __name__ == '__main__':
+        db_ver = create_db_tables('/mnt/c/Users/colta/portfolio/codex_vitae_app/data/testdb')
+        print(db_ver)
+
