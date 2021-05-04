@@ -2,8 +2,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
 from contextlib import closing
-
 import sqlite3
 
 def db_create(db_path):
@@ -32,20 +32,20 @@ def db_create(db_path):
         DROP TABLE IF EXISTS bullet_journal;
         DROP VIEW IF EXISTS journal_view;
 
-        CREATE TABLE rescuetime (
+        CREATE TABLE rescuetime(
             date text PRIMARY KEY,
             prd_hours float NOT NULL,
             dst_hours float NOT NULL,
             neut_hours float NOT NULL
         );
 
-        CREATE TABLE remarkable (
+        CREATE TABLE remarkable(
             date text PRIMARY KEY,
             mood float NOT NULL,
             entry text NOT NULL
         );
 
-        CREATE TABLE fitness (
+        CREATE TABLE fitness(
             date text PRIMARY KEY,
             weight float,
             bmr float,
@@ -59,7 +59,7 @@ def db_create(db_path):
             calories_out float
         );
 
-        CREATE TABLE nutrition (
+        CREATE TABLE nutrition(
             date text PRIMARY KEY,
             calories float,
             total_fat float,
@@ -72,7 +72,7 @@ def db_create(db_path):
             fiber float
         );
 
-        CREATE TABLE exist_tags (
+        CREATE TABLE exist_tags(
             date text PRIMARY KEY,
             alcohol integer,
             bedsheets integer,
@@ -99,20 +99,20 @@ def db_create(db_path):
             writing integer
         );
 
-        CREATE TABLE exist_journal (
+        CREATE TABLE exist_journal(
             date text PRIMARY KEY,
             mood float,
             entry text
         );
 
-        CREATE TABLE exist_time (
+        CREATE TABLE exist_time(
             date text PRIMARY KEY,
             prd_hours float,
             dst_hours float,
             neut_hours float
         );
 
-        CREATE TABLE exist_fitness (
+        CREATE TABLE exist_fitness(
             date text PRIMARY KEY,
             active_cal float,
             pulse float,
@@ -122,10 +122,10 @@ def db_create(db_path):
             weight float,
             sleep float,
             sleep_end float,
-            sleep_start float,
+            sleep_start float
         );
 
-        CREATE TABLE mood_charts (
+        CREATE TABLE mood_charts(
             date text PRIMARY KEY,
             mood float,
             sleep float,
@@ -134,7 +134,7 @@ def db_create(db_path):
             mood_note text
         );
 
-        CREATE TABLE bullet_journal (
+        CREATE TABLE bullet_journal(
             date text PRIMARY KEY,
             mood float,
             sleep float,
@@ -151,7 +151,8 @@ def db_create(db_path):
             guitar integer
         );
 
-        CREATE VIEW journal_view (
+        CREATE VIEW journal_view(date, mood, entry)
+        AS
             SELECT date, (mood-4)/3 as mood, mood_note FROM mood_chart
             UNION
             SELECT date, (mood-5)/4 as mood, mood_note FROM bullet_journal
@@ -159,59 +160,359 @@ def db_create(db_path):
             SELECT date, (mood-3)/2 as mood, entry FROM exist_journal
             UNION
             SELECT date, (mood-5)/4 as mood, entry FROM remarkable
-        )
-
-    """)
+        ;
+        """)
 
     cur = con.cursor()
-    con.execute('SELECT SQLITE_VERSION()')
-    data = cur.fetchone()
-    db_ver = f"SQLite version: {data}"
+    ver = con.execute('SELECT SQLITE_VERSION()').fetchone()
+    db_ver = f"SQLite version: {ver}"
     con.close()
 
     return db_ver
 
+class SQLiteInsertions:
+    """Class for inserting data into SQLite database."""
 
-def db_insert(db_path, tuple_gen, task):
-    """Insert data into SQLite3 DB tables.
+    def rescuetime_insert(self, db_path, tuple_gen):
+        """Insert data into rescuetime table.
 
-    Args:
-        db_path: A string containing the full directory and database name.
-        tuple_gen: list of generators containing data to be inserted.
-        type: 'refresh' to populate all tables, or 'weekly' for scheduled etl tasks.
-    """
+        Args:
+            db_path: A string containing the full directory and database name.
+            tuple_gen: generator object containing date tuples to be inserted.
+        """
 
-    on = sqlite3.connect(db_path) 
-    con.row_factory = sqlite3.Row
+        con = sqlite3.connect(db_path) 
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
 
-    if task = 'refresh':
-
-        rt_sql = """
+        sql = """
         INSERT INTO rescuetime
         (date, prod_hours, dist_hours, neut_hours)
         VALUES (?, ?, ?, ?)
         ON CONFLICT(date) DO UPDATE SET date = excluded.date
         """
 
-        journal_sql = """
-        INSERT INTO journal
+        with con:
+            con.executemany(sql,tuple_gen)
+       
+        con.close()
+
+        return cur.lastrowid
+    
+    def remarkable_insert(self, db_path, tuple_gen):
+        """Insert data into remarkable table.
+
+        Args:
+            db_path: A string containing the full directory and database name.
+            tuple_gen: generator object containing date tuples to be inserted.
+        """
+
+        con = sqlite3.connect(db_path) 
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+
+        sql = """
+        INSERT INTO remarkable
             (date, mood, entry)
         VALUES (?, ?, ?)
         ON CONFLICT(date) DO UPDATE SET date = excluded.date
         """
 
-    if task = 'weekly':
+        with con:
+            con.executemany(sql,tuple_gen)
+       
+        con.close()
+
+        return cur.lastrowid
+
+    def fitness_insert(self, db_path, tuple_gen):
+        """Insert data into fitness table.
+
+        Args:
+            db_path: A string containing the full directory and database name.
+            tuple_gen: generator object containing date tuples to be inserted.
+        """
+
+        con = sqlite3.connect(db_path) 
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+
+        sql = """
+        INSERT INTO fitness (
+            date,
+            weight,
+            bmr,
+            pulse,
+            sleep,
+            deep_sleep,
+            light_sleep,
+            rem_sleep,
+            awakes,
+            daily_steps,
+            calories_out)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(date) DO UPDATE SET date = excluded.date
+        """
 
         with con:
-            con.executemany(sql,(row[0],row_generator()))
+            con.executemany(sql,tuple_gen)
+       
+        con.close()
 
- 
-    for row in journal_tuple:
-        cur.execute(sql,(row[0],row[1],row[2]))
-    con.close()
-    
+        return cur.lastrowid
 
-    return cur.lastrowid
+    def nutrition_insert(self, db_path, tuple_gen):
+        """Insert data into nutrition table.
+
+        Args:
+            db_path: A string containing the full directory and database name.
+            tuple_gen: generator object containing date tuples to be inserted.
+        """
+
+        con = sqlite3.connect(db_path) 
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+
+        sql = """
+        INSERT INTO nutrition (
+            date,
+            calories,
+            total_fat,
+            total_carbs,
+            protein,
+            trans_fat,
+            sat_fat,
+            sodium,
+            net_carbs,
+            fiber)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(date) DO UPDATE SET date = excluded.date
+        """
+
+        with con:
+            con.executemany(sql,tuple_gen)
+       
+        con.close()
+
+        return cur.lastrowid
+
+    def exist_tags_insert(self, db_path, tuple_gen):
+        """Insert data into exist_tags table.
+
+        Args:
+            db_path: A string containing the full directory and database name.
+            tuple_gen: generator object containing date tuples to be inserted.
+        """
+
+        con = sqlite3.connect(db_path) 
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+
+        sql = """
+        INSERT INTO exist_tags (
+            date,
+            alcohol,
+            bedsheets,
+            cardio,
+            cleaning,
+            drawing,
+            eating_out,
+            fasting,
+            guitar,
+            laundry,
+            learning,
+            meal_prep,
+            meditation,
+            nap,
+            nutribullet,
+            piano,
+            powerdrive,
+            reading,
+            shopping,
+            tech,
+            travel,
+            tv,
+            walk,
+            writing)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? ,?,
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? ,?)
+        ON CONFLICT(date) DO UPDATE SET date = excluded.date
+        """
+
+        with con:
+            con.executemany(sql,tuple_gen)
+       
+        con.close()
+
+        return cur.lastrowid
+
+    def exist_journal_insert(self, db_path, tuple_gen):
+        """Insert data into exist_journal table.
+
+        Args:
+            db_path: A string containing the full directory and database name.
+            tuple_gen: generator object containing date tuples to be inserted.
+        """
+
+        con = sqlite3.connect(db_path) 
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+
+        sql = """
+        INSERT INTO exist_journal
+            (date, mood, entry)
+        VALUES (?, ?, ?)
+        ON CONFLICT(date) DO UPDATE SET date = excluded.date
+        """
+
+        with con:
+            con.executemany(sql,tuple_gen)
+       
+        con.close()
+
+        return cur.lastrowid
+
+    def exist_time_insert(self, db_path, tuple_gen):
+        """Insert data into exist_time table.
+
+        Args:
+            db_path: A string containing the full directory and database name.
+            tuple_gen: generator object containing date tuples to be inserted.
+        """
+
+        con = sqlite3.connect(db_path) 
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+
+        sql = """
+        INSERT INTO exist_time (
+            date, prd_hours, dst_hours, neut_hours)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(date) DO UPDATE SET date = excluded.date
+        """
+
+        with con:
+            con.executemany(sql,tuple_gen)
+       
+        con.close()
+
+        return cur.lastrowid
+
+    def exist_fitness_insert(self, db_path, tuple_gen):
+        """Insert data into exist_fitness table.
+
+        Args:
+            db_path: A string containing the full directory and database name.
+            tuple_gen: generator object containing date tuples to be inserted.
+        """
+
+        con = sqlite3.connect(db_path) 
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+
+        sql = """
+        INSERT INTO exist_fitness (
+            date,
+            active_cal,
+            pulse,
+            pulse_max,
+            pulse_rest,
+            steps,
+            weight,
+            sleep,
+            sleep_end,
+            sleep_start)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(date) DO UPDATE SET date = excluded.date
+        """
+
+        with con:
+            con.executemany(sql,tuple_gen)
+       
+        con.close()
+
+        return cur.lastrowid
+
+    def mood_charts_insert(self, db_path, tuple_gen):
+        """Insert data into mood_charts table.
+
+        Args:
+            db_path: A string containing the full directory and database name.
+            tuple_gen: generator object containing date tuples to be inserted.
+        """
+
+        con = sqlite3.connect(db_path) 
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+
+        sql = """
+        INSERT INTO mood_charts (
+            date,
+            mood,
+            sleep,
+            cardio,
+            meditate,
+            mood_note)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(date) DO UPDATE SET date = excluded.date
+        """
+
+        with con:
+            con.executemany(sql,tuple_gen)
+       
+        con.close()
+
+        return cur.lastrowid
+
+    def bullet_journal_insert(self, db_path, tuple_gen):
+        """Insert data into bullet_journal table.
+
+        Args:
+            db_path: A string containing the full directory and database name.
+            tuple_gen: generator object containing date tuples to be inserted.
+        """
+
+        con = sqlite3.connect(db_path) 
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+
+        sql = """
+        INSERT INTO bullet_journal (
+            date,
+            mood,
+            sleep,
+            steps,
+            cardio,
+            meditate,
+            mood_note,
+            fasting,
+            cheat_meals,
+            read,
+            draw,
+            learn,
+            write,
+            guitar)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(date) DO UPDATE SET date = excluded.date
+        """
+
+        with con:
+            con.executemany(sql,tuple_gen)
+       
+        con.close()
+
+        return cur.lastrowid
+
+    def run_refresh(self):
+        pass
+
+    def run_weekly(self):
+        pass
+
+
+def db_backup(db_path):
+    pass
+
 
 # TODO: ROLL THESE INTO MYNETDIARY FUNCTIONS
 def to_tuple_list(df):
@@ -233,7 +534,7 @@ def row_generator(tuple_list):
     for tuple_ in tuple_list:
         yield (tuple_,)
 
-    if __name__ == '__main__':
-        db_ver = create_db_tables('/mnt/c/Users/colta/portfolio/codex_vitae_app/data/testdb')
-        print(db_ver)
+if __name__ == '__main__':
+    db_ver = db_create(os.getenv('DB_PATH'))
+    print(db_ver)
 
