@@ -90,7 +90,7 @@ class reMarkableParsing:
 
         Returns:
             email_list: A list of strings containing raw emails to be processed.
-            journal_tuples: List of tuples sorted by date containing parsed journal data.
+            journal_gen: A generator object containing parsed journal data.
         """
 
         # Emails containing PDF attachments instead of text must be removed.
@@ -103,11 +103,12 @@ class reMarkableParsing:
         date_ = [self.journal_date(entry) for entry in clean_text]
         journal = [self.journal_entry(entry) for entry in clean_text]
 
-        journal_tuples = [(day,m,j) for (day,m,j) in zip(date_, mood,journal)]
-        journal_tuples = sorted(journal_tuples,key=lambda x: x[0])
+        journal_gen = ((day,m,j) for (day,m,j) in zip(date_, mood,journal))
+        
+        # TODO: Test performance of sorting here vs SQL query
+        # journal_tuples = sorted(journal_tuples,key=lambda x: x[0])
 
-        return journal_tuples
-
+        return journal_gen
 
 def fitness_parsing(email_list: list) -> list:
     """Use Pandas functions to parse fitness data from MyNetDiary emails for database insertion.
@@ -115,7 +116,7 @@ def fitness_parsing(email_list: list) -> list:
     Arguments:
         email_list: List of strings containing raw HTML from MyNetDiary emails.
     Returns:
-        fitness_tuples: List of tuples containing pertinent fitness data.
+        fitness_tuples: A generator object containing tuples of pertinent fitness data.
     """
 
     df_list = []
@@ -153,7 +154,8 @@ def fitness_parsing(email_list: list) -> list:
     # Convert dataframe into list of tuples.
     fitness_tuples = list(fitness_df.itertuples(index=False,name=None))
 
-    return fitness_tuples
+    for tuple_ in fitness_tuples:
+        yield (tuple_,)
 
 
 def nutrition_parsing(email_list: list) -> list:
@@ -162,7 +164,7 @@ def nutrition_parsing(email_list: list) -> list:
     Arguments:
         email_list: List of strings containing raw HTML from MyNetDiary emails.
     Returns:
-        nutrition_tuples: List of tuples containing pertinent fitness data.
+        nutrition_tuples: A generator object containing tuples of pertinent nutrition data.
     """
 
     df_list = []
@@ -215,7 +217,8 @@ def nutrition_parsing(email_list: list) -> list:
 
     nutrition_tuples = list(nutrition_df.itertuples(index=False,name=None))
 
-    return nutrition_tuples
+    for tuple_ in nutrition_tuples:
+        yield (tuple_,)
 
 
 

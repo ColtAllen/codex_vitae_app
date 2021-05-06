@@ -19,7 +19,22 @@ class ETLMethodTestCase(TestCase):
         THEN
         """
 
-        pass
+        db_ver = db_create(os.getenv('DB_PATH'))   
+
+        rt = get_rescuetime_daily(os.getenv('API_KEY'))
+        rt_ins = rescuetime_insert(os.getenv('DB_PATH'), rt)
+        
+        con = sqlite3.connect(os.getenv('DB_PATH')) 
+        #con.row_factory = sqlite3.Row
+
+        sql = """
+        select * from rescuetime
+        """
+        cur = con.cursor()
+        cur.execute(sql)
+        print(cur.fetchall())
+        
+        con.close()
 
 
     

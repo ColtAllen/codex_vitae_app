@@ -112,12 +112,9 @@ def get_rescuetime_daily(KEY):
         dist_hours = [day.get('all_distracting_hours') for day in iter_result]
         neut_hours = [day.get('neutral_hours') for day in iter_result]
 
-        rescuetime_tuple = [(day,p,d,n) for (day,p,d,n) in zip(days,prod_hours,dist_hours,neut_hours)]
+        rescuetime_tuple = ((day,p,d,n) for (day,p,d,n) in zip(days,prod_hours,dist_hours,neut_hours))
 
         session.close()
 
     return rescuetime_tuple
-
-
-    
     

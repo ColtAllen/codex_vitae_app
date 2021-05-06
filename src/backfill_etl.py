@@ -125,32 +125,43 @@ def exist_dataframes(filepath):
     
     return df_list
 
+def to_tuple_gen(df):
+    """Convert a pandas DF into a generator object for database insertion.
+
+    Args:
+        df: The pandas dataframe to be converted
+    
+    Returns: 
+        tuple_list: A generator object of tuples.
+        """
+    
+    tuple_gen = list(df.itertuples(index=False,name=None))
+
+    for tuple_ in tuple_gen:
+        yield (tuple_,)
 
 if __name__ == '__main__':
 
     _df_list = exist_dataframes(os.getenv('DIR'))
 
     # Convert dataframes into lists of tuples.
-    _exist_tags = to_tuple_list(_df_list[0])
-    _exist_journal = to_tuple_list(_df_list[1]) # TODO scale 1-9 in SQL insert statement
-    _exist_rescuetime = to_tuple_list(_df_list[2]) # TODO convert min to hours in SQL insert statement
-    _exist_garmin = to_tuple_list(_df_list[3])
+    _exist_tags = to_tuple_gen(_df_list[0])
+    _exist_journal = to_tuple_gen(_df_list[1]) # TODO scale 1-9 in SQL insert statement
+    _exist_rescuetime = to_tuple_gen(_df_list[2]) # TODO convert min to hours in SQL insert statement
+    _exist_garmin = to_tuple_gen(_df_list[3])
 
     os.chdir(os.getenv('DIR'))
 
     _mood_charts = pd.read_csv('mood_charts.csv')
-    _mood_charts = to_tuple_list(_mood_charts)
+    _mood_charts = to_tuple_gen(_mood_charts)
     # TODO: mood_charts.columns = [Date,Mood,Sleep,Cardio,Meditate,Mood_Note] #scale mood 1-7 in SQL insert statement
     
     _bullet_journal = pd.read_csv('bullet_journal.csv')
-    _bullet_journal = to_tuple_list(_bullet_journal)
+    _bullet_journal = to_tuple_gen(_bullet_journal)
     # TODO: bullet_journal.columns - [Date,Mood,Sleep,Steps,Cardio,Meditate,Mood_Note,Fasting,Cheat Meals,Read,Draw,Learn,Write,Guitar] #scale mood 1-5
     
     with authenticate_gmail_api(os.getenv('CREDENTIALS')) as service:
         _remarkable = get_email_content(service,query="from:my@remarkable.com")
         _mynetdiary = get_email_content(service,query="from:no-reply@mynetdiary.net")
     
-    with closing(open(os.getenv('API_KEY'), "r")) as file:
-        _credentials = json.load(file)
-        _KEY = _credentials.get('rescuetime').get('KEY')
-        _rescuetime_tuple = get_rescuetime_daily(_KEY)
+    _rescuetime_tuple = get_rescuetime_daily(os.getenv('API_KEY'))
