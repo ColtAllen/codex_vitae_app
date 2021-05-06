@@ -188,6 +188,6 @@ if __name__ == '__main__':
     # Create DB and perform insertions.
     db_create(os.getenv('DB_PATH'))
     db_historical(os.getenv('DB_PATH'), hist_list)
-    db_prod(os.getenv('DB_PATH'), hist_list)
+    db_prod(os.getenv('DB_PATH'), prod_list)
     
     # TODO: Add SQL update statements to fix bad entries.
