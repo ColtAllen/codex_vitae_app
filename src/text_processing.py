@@ -85,7 +85,7 @@ class reMarkableParsing:
 
         return entry
     
-    def run(self, email_list: list) -> list:
+    def run(self, email_list):
         """Arranges all journal data in format required for database insertion.
 
         Returns:
@@ -103,12 +103,13 @@ class reMarkableParsing:
         date_ = [self.journal_date(entry) for entry in clean_text]
         journal = [self.journal_entry(entry) for entry in clean_text]
 
-        journal_gen = ((day,m,j) for (day,m,j) in zip(date_, mood,journal))
+        journal_gen = [(day,m,j) for (day,m,j) in zip(date_, mood,journal)]
         
         # TODO: Test performance of sorting here vs SQL query
         # journal_tuples = sorted(journal_tuples,key=lambda x: x[0])
 
-        return journal_gen
+        for tuple_ in journal_gen:
+            yield (tuple_,)
 
 def fitness_parsing(email_list: list) -> list:
     """Use Pandas functions to parse fitness data from MyNetDiary emails for database insertion.

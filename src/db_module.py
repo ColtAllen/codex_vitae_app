@@ -17,7 +17,7 @@ def db_create(db_path):
     """
 
     con = sqlite3.connect(db_path)
-    
+
     con.executescript("""
         DROP TABLE IF EXISTS rescuetime;
         DROP TABLE IF EXISTS remarkable;
@@ -160,6 +160,14 @@ def db_create(db_path):
             UNION
             SELECT date, (mood-5)/4 as mood, entry FROM remarkable
         ;
+
+        CREATE VIEW rescuetime_all(date, prd_hours, dst_hours, neut_hours)
+        AS
+            SELECT * FROM exist_time
+            UNION
+            SELECT * FROM rescuetime
+        ;
+
         """)
 
     ver = con.execute('SELECT SQLITE_VERSION()').fetchone()
@@ -197,7 +205,7 @@ def db_historical(db_path, gen_list):
 
     Args:
         db_path: String containing the full directory and database name. 
-        gen_list: Generator object containing date tuples to be inserted.
+        gen_list: List of generator objects containing date tuples to be inserted.
     """
 
     tags_sql = """
@@ -240,7 +248,7 @@ def db_historical(db_path, gen_list):
 
     exist_time_sql = """
         INSERT INTO exist_time (
-            date, prd_hours, dst_hours, neut_hours)
+            date, prd_mins, dst_mins, neut_mins)
         VALUES (?, ?, ?, ?)
         ON CONFLICT(date) DO UPDATE SET date = excluded.date
         """
