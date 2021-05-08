@@ -84,7 +84,6 @@ def exist_dataframes(filepath):
             'nap',
             'nutribullet',
             'piano',
-            'powerdrive',
             'reading',
             'shopping',
             'tech',
@@ -150,6 +149,15 @@ if __name__ == '__main__':
     _exist_rescuetime = to_tuple_gen(_df_list[2])
     _exist_garmin = to_tuple_gen(_df_list[3])
 
+    for df in _df_list:
+        print(df.info())
+
+    # Convert dataframes into tuple lists.
+    _exist_tags = list(_df_list[0].itertuples(index=False,name=None))
+    _exist_journal = list(_df_list[1].itertuples(index=False,name=None))
+    _exist_rescuetime = list(_df_list[2].itertuples(index=False,name=None))
+    _exist_garmin = list(_df_list[3].itertuples(index=False,name=None))
+
     # Convert CSV files into tuple generators.
     os.chdir(os.getenv('DIR'))
 
@@ -158,6 +166,8 @@ if __name__ == '__main__':
     
     _bullet_journal = pd.read_csv('bullet_journal.csv')
     _bullet_journal = to_tuple_gen(_bullet_journal)
+
+    os.chdir(os.getenv('CONFIG'))
 
     # Perform API calls for production data.
     with authenticate_gmail_api(os.getenv('CREDENTIALS')) as service:
@@ -171,7 +181,7 @@ if __name__ == '__main__':
     _fitness = fitness_parsing(_mynetdiary)
     _nutrition = nutrition_parsing(_mynetdiary)
 
-    hist_list = [_exist_tags,
+    _hist_list = [_exist_tags,
                  _exist_journal,
                  _exist_rescuetime, 
                  _exist_garmin,
@@ -179,15 +189,15 @@ if __name__ == '__main__':
                  _bullet_journal,
                 ]
 
-    prod_list = [_rescuetime,
+    _prod_list = [_rescuetime,
                  _remarkable,
                  _fitness,
                  _nutrition,
                 ]
 
     # Create DB and perform insertions.
-    db_create(os.getenv('DB_PATH'))
-    db_historical(os.getenv('DB_PATH'), hist_list)
-    db_prod(os.getenv('DB_PATH'), prod_list)
+    #db_create(os.getenv('DB_PATH'))
+    #db_historical(os.getenv('DB_PATH'), _hist_list)
+    db_prod(os.getenv('DB_PATH'), _prod_list)
     
     # TODO: Add SQL update statements to fix bad entries.

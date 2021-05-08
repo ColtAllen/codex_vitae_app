@@ -108,8 +108,9 @@ class reMarkableParsing:
         # TODO: Test performance of sorting here vs SQL query
         # journal_tuples = sorted(journal_tuples,key=lambda x: x[0])
 
-        for tuple_ in journal_gen:
-            yield (tuple_,)
+        # for tuple_ in journal_gen:
+        #    yield (tuple_,)
+        return journal_gen
 
 def fitness_parsing(email_list: list) -> list:
     """Use Pandas functions to parse fitness data from MyNetDiary emails for database insertion.
@@ -157,7 +158,7 @@ def fitness_parsing(email_list: list) -> list:
 
     for tuple_ in fitness_tuples:
         yield (tuple_,)
-
+    #return fitness_tuples
 
 def nutrition_parsing(email_list: list) -> list:
     """Use Pandas functions to parse nutrition data from MyNetDiary emails for database insertion.
@@ -220,7 +221,7 @@ def nutrition_parsing(email_list: list) -> list:
 
     for tuple_ in nutrition_tuples:
         yield (tuple_,)
-
+    # return nutrition_tuples
 
 
 

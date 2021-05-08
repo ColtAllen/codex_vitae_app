@@ -18,7 +18,8 @@ def authenticate_gmail_api(credentials):
     """Authenticate email API from credentials declared from an env variable.
 
     Args:
-        credentials: A string containing the filepath to the API credentials. 
+        credentials: A string containing the filepath to the API credentials.
+        token: 
 
     Returns:
         API service object.

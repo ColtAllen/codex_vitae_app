@@ -30,6 +30,7 @@ def db_create(db_path):
         DROP TABLE IF EXISTS mood_charts;
         DROP TABLE IF EXISTS bullet_journal;
         DROP VIEW IF EXISTS journal_view;
+        DROP VIEW IF EXISTS rescuetime_all;
 
         CREATE TABLE rescuetime(
             date text PRIMARY KEY,
@@ -194,7 +195,7 @@ def db_insert(db_path, sql, tuple_gen):
         con.executemany(sql,tuple_gen)
         # cur = con.cursor()
         # row_count = cur.lastrowid
-        con.close()
+    con.close()
     
     # TODO: Add row_count to logger rather than returned by function.
     # return row_count
@@ -226,7 +227,6 @@ def db_historical(db_path, gen_list):
             nap,
             nutribullet,
             piano,
-            powerdrive,
             reading,
             shopping,
             tech,
@@ -235,7 +235,7 @@ def db_historical(db_path, gen_list):
             walk,
             writing)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? ,?,
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? ,?)
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?)
         ON CONFLICT(date) DO UPDATE SET date = excluded.date
         """
 
