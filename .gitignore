@@ -6,7 +6,7 @@
 /notebooks
 /tutorials
 api_wrangling.ipynb
-codex_vitae_backcast.ipynb
+codex_vitae.ipynb
 mood_markov.ipynb
 mynetdiary_parsing.ipynb
 run_etl.sh

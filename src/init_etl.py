@@ -11,7 +11,7 @@ from dateutil.relativedelta import relativedelta
 
 import pandas as pd
 
-from db_module import db_create, db_historical, db_prod
+from db_module import db_create, db_historical, db_prod, db_insert
 from api_requests import authenticate_gmail_api, get_email_content, get_rescuetime_daily
 from text_processing import reMarkableParsing, fitness_parsing, nutrition_parsing
 
@@ -69,10 +69,10 @@ def exist_dataframes(filepath):
 
     # Lists of desired datafields from Exist.
     # Each list will be inserted into its own database table.
-    tags = ['alcohol',
-            'bedsheets', 
+    tags = ['bedsheets', 
             'cardio', 
             'cleaning',
+            'dating',
             'drawing', 
             'eating_out', 
             'fasting', 
@@ -93,7 +93,7 @@ def exist_dataframes(filepath):
             'writing',
             ]
 
-    journal = ['mood','journal']
+    journal = ['mood','mood_note']
 
     productivity = ['productive_min','distracting_min','neutral_min']
 
@@ -117,21 +117,22 @@ def exist_dataframes(filepath):
     for jsons in json_lists:
         df_years = [json_to_df(jsons,year) for year in year_list]
         df = pd.concat(df_years,axis=0)
-        df['date'] = pd.to_datetime(df['date'])
+        #df['date'] = pd.to_datetime(df['date'])
         # df = df.sort_values(by='date',axis=0)
         df[df['date'] < '2020-04-06'] #raised KeyError
+        df = df.dropna()
         df_list.append(df)
     
     return df_list
 
 def to_tuple_gen(df):
-    """Convert a pandas DF into a generator object for database insertion.
+    """Convert a pandas DF for database insertion.
 
     Args:
         df: The pandas dataframe to be converted
     
     Returns: 
-        tuple_list: A generator object of tuples.
+        tuple_list: A list of tuples.
         """
     
     tuple_gen = list(df.itertuples(index=False,name=None))
@@ -143,15 +144,6 @@ if __name__ == '__main__':
 
     _df_list = exist_dataframes(os.getenv('DIR'))
 
-    # Convert dataframes into tuple generators.
-    _exist_tags = to_tuple_gen(_df_list[0])
-    _exist_journal = to_tuple_gen(_df_list[1])
-    _exist_rescuetime = to_tuple_gen(_df_list[2])
-    _exist_garmin = to_tuple_gen(_df_list[3])
-
-    for df in _df_list:
-        print(df.info())
-
     # Convert dataframes into tuple lists.
     _exist_tags = list(_df_list[0].itertuples(index=False,name=None))
     _exist_journal = list(_df_list[1].itertuples(index=False,name=None))
@@ -162,10 +154,10 @@ if __name__ == '__main__':
     os.chdir(os.getenv('DIR'))
 
     _mood_charts = pd.read_csv('mood_charts.csv')
-    _mood_charts = to_tuple_gen(_mood_charts)
+    _mood_charts = list(_mood_charts.itertuples(index=False,name=None))
     
     _bullet_journal = pd.read_csv('bullet_journal.csv')
-    _bullet_journal = to_tuple_gen(_bullet_journal)
+    _bullet_journal = list(_bullet_journal.itertuples(index=False,name=None))
 
     os.chdir(os.getenv('CONFIG'))
 
@@ -196,8 +188,8 @@ if __name__ == '__main__':
                 ]
 
     # Create DB and perform insertions.
-    #db_create(os.getenv('DB_PATH'))
-    #db_historical(os.getenv('DB_PATH'), _hist_list)
+    db_create(os.getenv('DB_PATH'))
+    db_historical(os.getenv('DB_PATH'), _hist_list)
     db_prod(os.getenv('DB_PATH'), _prod_list)
-    
+
     # TODO: Add SQL update statements to fix bad entries.

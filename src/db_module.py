@@ -49,35 +49,33 @@ def db_create(db_path):
             date text PRIMARY KEY,
             weight float,
             bmr float,
-            pulse float,
+            pulse integer,
             sleep float,
             deep_sleep float,
             light_sleep float,
             rem_sleep float,
             awakes float,
-            daily_steps float,
-            calories_out float
+            daily_steps integer,
+            calories_out integer
         );
 
         CREATE TABLE nutrition(
             date text PRIMARY KEY,
-            calories float,
-            total_fat float,
-            total_carbs float,
-            protein float,
-            trans_fat float,
-            sat_fat float,
-            sodium float,
-            net_carbs float,
-            fiber float
+            calories integer,
+            total_fat integer,
+            total_carbs integer,
+            protein integer,
+            sat_fat integer,
+            sodium integer,
+            net_carbs integer
         );
 
         CREATE TABLE exist_tags(
-            date text PRIMARY KEY,
-            alcohol integer,
             bedsheets integer,
+            date text PRIMARY KEY,
             cardio integer,
             cleaning integer,
+            dating integer,
             drawing integer,
             eating_out integer,
             fasting integer,
@@ -89,7 +87,6 @@ def db_create(db_path):
             nap integer,
             nutribullet integer,
             piano integer,
-            powerdrive integer,
             reading integer,
             shopping integer,
             tech integer,
@@ -100,21 +97,21 @@ def db_create(db_path):
         );
 
         CREATE TABLE exist_journal(
-            date text PRIMARY KEY,
             mood float,
+            date text PRIMARY KEY,
             entry text
         );
 
         CREATE TABLE exist_time(
+            prd_mins float,
             date text PRIMARY KEY,
-            prd_hours float,
-            dst_hours float,
-            neut_hours float
+            dst_mins float,
+            neut_mins float
         );
 
         CREATE TABLE exist_fitness(
-            date text PRIMARY KEY,
             active_cal float,
+            date text PRIMARY KEY,
             pulse float,
             pulse_max float,
             pulse_rest float,
@@ -128,7 +125,7 @@ def db_create(db_path):
         CREATE TABLE mood_charts(
             date text PRIMARY KEY,
             mood float,
-            sleep float,
+            sleep integer,
             cardio integer,
             meditate integer,
             mood_note text
@@ -137,8 +134,8 @@ def db_create(db_path):
         CREATE TABLE bullet_journal(
             date text PRIMARY KEY,
             mood float,
-            sleep float,
-            steps float,
+            sleep integer,
+            steps integer,
             cardio integer,
             meditate integer,
             mood_note text,
@@ -153,7 +150,7 @@ def db_create(db_path):
 
         CREATE VIEW journal_view(date, mood, entry)
         AS
-            SELECT date, (mood-4)/3 as mood, mood_note FROM mood_chart
+            SELECT date, (mood-4)/3 as mood, mood_note FROM mood_charts
             UNION
             SELECT date, (mood-3)/2 as mood, mood_note FROM bullet_journal
             UNION
@@ -162,9 +159,14 @@ def db_create(db_path):
             SELECT date, (mood-5)/4 as mood, entry FROM remarkable
         ;
 
-        CREATE VIEW rescuetime_all(date, prd_hours, dst_hours, neut_hours)
+        CREATE VIEW rescuetime_view(date, prd_hours, dst_hours, neut_hours)
         AS
-            SELECT * FROM exist_time
+            SELECT
+            date, 
+            prd_mins/60 as prd_hours,
+            dst_mins/60 as dst_hours,
+            neut_mins/60 as neut_hours
+            FROM exist_time
             UNION
             SELECT * FROM rescuetime
         ;
@@ -211,11 +213,11 @@ def db_historical(db_path, gen_list):
 
     tags_sql = """
         INSERT INTO exist_tags (
-            date,
-            alcohol,
             bedsheets,
+            date,
             cardio,
             cleaning,
+            dating,
             drawing,
             eating_out,
             fasting,
@@ -234,29 +236,29 @@ def db_historical(db_path, gen_list):
             tv,
             walk,
             writing)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? ,?,
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?,
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?, ?)
         ON CONFLICT(date) DO UPDATE SET date = excluded.date
         """
 
     exist_mood_sql = """
         INSERT INTO exist_journal
-            (date, mood, entry)
+            (mood, date, entry)
         VALUES (?, ?, ?)
         ON CONFLICT(date) DO UPDATE SET date = excluded.date
         """
 
     exist_time_sql = """
-        INSERT INTO exist_time (
-            date, prd_mins, dst_mins, neut_mins)
+        INSERT INTO exist_time
+            (prd_mins, date, dst_mins, neut_mins)
         VALUES (?, ?, ?, ?)
         ON CONFLICT(date) DO UPDATE SET date = excluded.date
         """
 
     exist_fit_sql = """
         INSERT INTO exist_fitness (
-            date,
             active_cal,
+            date,
             pulse,
             pulse_max,
             pulse_rest,
@@ -359,12 +361,10 @@ def db_prod(db_path, gen_list):
             total_fat,
             total_carbs,
             protein,
-            trans_fat,
             sat_fat,
             sodium,
-            net_carbs,
-            fiber)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            net_carbs)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(date) DO UPDATE SET date = excluded.date
         """
 
