@@ -30,7 +30,7 @@ def db_create(db_path):
         DROP TABLE IF EXISTS mood_charts;
         DROP TABLE IF EXISTS bullet_journal;
         DROP VIEW IF EXISTS journal_view;
-        DROP VIEW IF EXISTS rescuetime_all;
+        DROP VIEW IF EXISTS rescuetime_view;
 
         CREATE TABLE rescuetime(
             date text PRIMARY KEY,
