@@ -69,7 +69,8 @@ def exist_dataframes(filepath):
 
     # Lists of desired datafields from Exist.
     # Each list will be inserted into its own database table.
-    tags = ['bedsheets', 
+    tags = ['alcohol',
+            'bedsheets', 
             'cardio', 
             'cleaning',
             'dating',
@@ -117,10 +118,8 @@ def exist_dataframes(filepath):
     for jsons in json_lists:
         df_years = [json_to_df(jsons,year) for year in year_list]
         df = pd.concat(df_years,axis=0)
-        #df['date'] = pd.to_datetime(df['date'])
-        # df = df.sort_values(by='date',axis=0)
-        df[df['date'] < '2020-04-06'] #raised KeyError
-        df = df.dropna()
+        df[df['date'] < '2020-04-06']
+        df = df.fillna(0)
         df_list.append(df)
     
     return df_list
@@ -154,9 +153,11 @@ if __name__ == '__main__':
     os.chdir(os.getenv('DIR'))
 
     _mood_charts = pd.read_csv('mood_charts.csv')
+    #_mood_charts = _mood_charts.fillna(0)
     _mood_charts = list(_mood_charts.itertuples(index=False,name=None))
     
     _bullet_journal = pd.read_csv('bullet_journal.csv')
+    #_bullet_journal = _bullet_journal.fillna(0)
     _bullet_journal = list(_bullet_journal.itertuples(index=False,name=None))
 
     os.chdir(os.getenv('CONFIG'))

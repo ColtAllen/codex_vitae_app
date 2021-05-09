@@ -71,8 +71,9 @@ def db_create(db_path):
         );
 
         CREATE TABLE exist_tags(
-            bedsheets integer,
+            alcohol integer,
             date text PRIMARY KEY,
+            bedsheets integer,
             cardio integer,
             cleaning integer,
             dating integer,
@@ -112,10 +113,10 @@ def db_create(db_path):
         CREATE TABLE exist_fitness(
             active_cal float,
             date text PRIMARY KEY,
-            pulse float,
-            pulse_max float,
-            pulse_rest float,
-            steps float,
+            pulse integer,
+            pulse_max integer,
+            pulse_rest integer,
+            steps integer,
             weight float,
             sleep float,
             sleep_end float,
@@ -213,8 +214,9 @@ def db_historical(db_path, gen_list):
 
     tags_sql = """
         INSERT INTO exist_tags (
-            bedsheets,
+            alcohol,
             date,
+            bedsheets,
             cardio,
             cleaning,
             dating,
@@ -236,7 +238,7 @@ def db_historical(db_path, gen_list):
             tv,
             walk,
             writing)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?,
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?, ?,
                 ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?, ?)
         ON CONFLICT(date) DO UPDATE SET date = excluded.date
         """
