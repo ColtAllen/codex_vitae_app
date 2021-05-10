@@ -6,9 +6,6 @@ import os
 from contextlib import closing
 import json
 
-from datetime import date
-from dateutil.relativedelta import relativedelta
-
 import pandas as pd
 
 from db_module import db_create, db_historical, db_prod, db_insert
@@ -119,7 +116,6 @@ def exist_dataframes(filepath):
         df_years = [json_to_df(jsons,year) for year in year_list]
         df = pd.concat(df_years,axis=0)
         df[df['date'] < '2020-04-06']
-        df = df.fillna(0)
         df_list.append(df)
     
     return df_list
@@ -144,25 +140,31 @@ if __name__ == '__main__':
     _df_list = exist_dataframes(os.getenv('DIR'))
 
     # Convert dataframes into tuple lists.
-    _exist_tags = list(_df_list[0].itertuples(index=False,name=None))
-    _exist_journal = list(_df_list[1].itertuples(index=False,name=None))
     _exist_rescuetime = list(_df_list[2].itertuples(index=False,name=None))
     _exist_garmin = list(_df_list[3].itertuples(index=False,name=None))
 
-    # Convert CSV files into tuple generators.
+    # Remove in nulls in Exist Journal DF before converting to tuple list.
+    _exist_journal = _df_list[1].dropna()
+    _exist_journal = list(_exist_journal.itertuples(index=False,name=None))
+
+    # Fill in nulls in Exist Tags DF before converting to tuple list.
+    _exist_tags = _df_list[0].fillna(0)
+    _exist_tags = list(_exist_tags.itertuples(index=False,name=None))
+
+    # Load CSVs, fill in nulls, and convert intointo tuple generators.
     os.chdir(os.getenv('DIR'))
 
     _mood_charts = pd.read_csv('mood_charts.csv')
-    #_mood_charts = _mood_charts.fillna(0)
+    _mood_charts = _mood_charts.fillna(0)
     _mood_charts = list(_mood_charts.itertuples(index=False,name=None))
     
     _bullet_journal = pd.read_csv('bullet_journal.csv')
-    #_bullet_journal = _bullet_journal.fillna(0)
+    _bullet_journal = _bullet_journal.fillna(0)
     _bullet_journal = list(_bullet_journal.itertuples(index=False,name=None))
 
+    # Perform API calls for production data.
     os.chdir(os.getenv('CONFIG'))
 
-    # Perform API calls for production data.
     with authenticate_gmail_api(os.getenv('CREDENTIALS')) as service:
         _remarkable = get_email_content(service,query="from:my@remarkable.com")
         _mynetdiary = get_email_content(service,query="from:no-reply@mynetdiary.net")
@@ -192,5 +194,3 @@ if __name__ == '__main__':
     db_create(os.getenv('DB_PATH'))
     db_historical(os.getenv('DB_PATH'), _hist_list)
     db_prod(os.getenv('DB_PATH'), _prod_list)
-
-    # TODO: Add SQL update statements to fix bad entries.
