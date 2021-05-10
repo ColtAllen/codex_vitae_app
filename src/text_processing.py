@@ -33,7 +33,7 @@ class reMarkableParsing:
         # Remove CSS syntx
         text = text.replace("b'p, li { white-space: pre-wrap; }","")
         # Remove Remarkable Footer
-        clean_text = text.replace(" --Sent from my reMarkable paper tabletGet yours at www.remarkable.comPS: You cannot reply to this email'","")
+        clean_text = text.replace("--Sent from my reMarkable paper tabletGet yours at www.remarkable.comPS: You cannot reply to this email'","")
 
         return clean_text
 
