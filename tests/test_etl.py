@@ -2,10 +2,19 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import contextlib
+from contextlib import closing
 
 from unittest import TestCase
 from unittest import mock
+
+from datetime import date
+import datetime
+from dateutil.relativedelta import relativedelta
+
+from db_module import db_prod, db_backup
+from api_requests import authenticate_gmail_api, get_email_content, get_rescuetime_daily
+from text_processing import reMarkableParsing, fitness_parsing, nutrition_parsing
+
 
 class ETLMethodTestCase(TestCase):
     def setUp(self):
@@ -46,10 +55,9 @@ class ETLMethodTestCase(TestCase):
     date_ = str(date.today()-relativedelta(days=14))
     service = authenticate_gmail_api()
     mynetdiary = get_email_content(service,query=f"from:no-reply@mynetdiary.net,after:{date_}")
-
-    #Confirm two weekly reports were returned.
-    assert(len(mynetdiary) == 3)
-
+    
+    #Confirm at least one weekly report was returned.
+    assert(len(mynetdiary) >= 1)
 
 
 # python -m -c -b --locals unittest test_etl.TestETLMethods

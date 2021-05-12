@@ -1,16 +1,16 @@
+# MIT LICENSE
+
 import datetime
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
-import plotly.express as px
 import numpy as np
 
 def display_year(journal_tuples: list,
                  year: int,
-                 month_lines: bool = True,
                  fig=None,
                  row: int = None):
 
-    days_in_year = [datetime.datetime.strptime(tup[0],'%Y-%m-%d') for tup in journal_tuples]
+    days = [datetime.datetime.strptime(tup[0],'%Y-%m-%d') for tup in journal_tuples]
     daily_moods = [tup[1] for tup in journal_tuples]
     daily_entries = [tup[2].replace('.', '.<br>') for tup in journal_tuples]
     
@@ -21,7 +21,7 @@ def display_year(journal_tuples: list,
     d2 = datetime.date(year, 12, 31)
 
     delta = d2 - d1
-    
+
     month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     month_days =   [31,    28,    31,     30,    31,     30,    31,    31,    30,    31,    30,    31]
     month_positions = (np.cumsum(month_days) - 15)/7
@@ -39,48 +39,47 @@ def display_year(journal_tuples: list,
             z=data,
             text=daily_entries,
             hoverinfo=['text','z'],
+            #hovertext=['text',data],
             xgap=3, # this
             ygap=3, # and this is used to make the grid-like apperance
             showscale=False,
-            colorscale=[(0,"blue"), (0.5,"white"),(1,"red")]
+            colorscale=[(0,"blue"), (0.5,"white"),(1,"red")] 
         )
     ]
     
+    kwargs = dict(
+        mode='lines',
+        line=dict(
+            color='#9e9e9e',
+            width=1
+        ),
+        hoverinfo='skip'
         
-    if month_lines:
-        kwargs = dict(
-            mode='lines',
-            line=dict(
-                color='#9e9e9e',
-                width=1
-            ),
-            hoverinfo='skip'
-            
-        )
-        for date, dow, wkn in zip(days_in_year,
-                                  weekdays_in_year,
-                                  weeknumber_of_dates):
-            if date.day == 1:
+    )
+    for date, dow, wkn in zip(days_in_year,
+                                weekdays_in_year,
+                                weeknumber_of_dates):
+        if date.day == 1:
+            data += [
+                go.Scatter(
+                    x=[wkn-.5, wkn-.5],
+                    y=[dow-.5, 6.5],
+                    **kwargs
+                )
+            ]
+            if dow:
                 data += [
-                    go.Scatter(
-                        x=[wkn-.5, wkn-.5],
-                        y=[dow-.5, 6.5],
-                        **kwargs
-                    )
-                ]
-                if dow:
-                    data += [
-                    go.Scatter(
-                        x=[wkn-.5, wkn+.5],
-                        y=[dow-.5, dow - .5],
-                        **kwargs
-                    ),
-                    go.Scatter(
-                        x=[wkn+.5, wkn+.5],
-                        y=[dow-.5, -.5],
-                        **kwargs
-                    )
-                ]
+                go.Scatter(
+                    x=[wkn-.5, wkn+.5],
+                    y=[dow-.5, dow - .5],
+                    **kwargs
+                ),
+                go.Scatter(
+                    x=[wkn+.5, wkn+.5],
+                    y=[dow-.5, -.5],
+                    **kwargs
+                )
+            ]
                     
                     
     layout = go.Layout(

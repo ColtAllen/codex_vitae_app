@@ -9,6 +9,7 @@ from datetime import date
 from dateutil.relativedelta import relativedelta
 
 import pandas as pd
+#lxml required for pandas to parse html tables
 
 class reMarkableParsing:
     """Extract date, mood rating, and journal entry from raw email bodies."""
@@ -211,7 +212,3 @@ def nutrition_parsing(email_list: list) -> list:
     nutrition_tuples = list(nutrition_df.itertuples(index=False,name=None))
 
     return nutrition_tuples
-
-
-
-

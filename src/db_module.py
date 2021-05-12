@@ -381,15 +381,39 @@ def db_prod(db_path, gen_list):
 
 
 def db_backup(db_path):
-    """Query entire database and save as .pkl objects.
+    """Query entire database and save as .pkl and json objects.
 
     Args:
         db_path: String containing the full directory and database name. 
 
     Returns:
-        Pickle files for each DB table.
+        Pickle and json files for each DB table.
     """
 
-    # TODO: Create a new git branch for this addition.
+    con = sqlite3.connect(db_path)
+    cur = con.cursor()
+
+    # Query from views
+    cur.execute("select * from journal_view order by date")
+    cur.execute("select * from rescuetime_view order by date")
+
+    # Query from historical tables
+    cur.execute("select * from exist_tags order by date")
+    cur.execute("select * from exist_journal order by date")
+    cur.execute("select * from exist_time order by date")
+    cur.execute("select * from exist_fitness order by date")
+    cur.execute("select * from mood_charts order by date")
+    cur.execute("select * from bullet_journal order by date")
+
+    # Query from production tables
+    cur.execute("select * from rescuetime order by date")
+    cur.execute("select * from remarkable order by date")
+    cur.execute("select * from fitness order by date")
+    cur.execute("select * from nutrition order by date")
+
+    # TODO: Add this to each execution and create a list for pkl and jsonification
+    results = cur.fetchall()
+
+    con.close()
 
     pass
