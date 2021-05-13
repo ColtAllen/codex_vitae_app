@@ -1,9 +1,11 @@
-# MIT LICENSE
-
 import datetime
+import numpy as np
+import json
+
+import plotly
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
-import numpy as np
+
 
 def annual_subplot(journal_tuples: list,
                  year: int,
@@ -147,4 +149,8 @@ def journal_calendar(journal_tuples):
         data = [tup for tup in journal_tuples if int(tup[0].split('-')[0]) == year]
         annual_subplot(data, year=year,fig=fig,row=i)
         fig.update_layout(height=250*len(years))
-    return fig
+    
+    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    return graphJSON
+    
