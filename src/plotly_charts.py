@@ -5,10 +5,21 @@ import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 import numpy as np
 
-def display_year(journal_tuples: list,
+def annual_subplot(journal_tuples: list,
                  year: int,
-                 fig=None,
+                 fig, object,
                  row: int = None):
+    """
+    Plots one year of journal data in a calendar format.
+
+    Args:
+        journal_tuples: A list of tuples containing journal data.
+        year: An int of the year to the plotted.
+        fig: An existing Plotly graph object.
+        row: int = A row index for updated the figure subplot.
+    Returns:
+        fig: Appended plotly graph object.
+    """
 
     days = [datetime.datetime.strptime(tup[0],'%Y-%m-%d') for tup in journal_tuples]
     daily_moods = [tup[1] for tup in journal_tuples]
@@ -26,62 +37,67 @@ def display_year(journal_tuples: list,
     month_days =   [31,    28,    31,     30,    31,     30,    31,    31,    30,    31,    30,    31]
     month_positions = (np.cumsum(month_days) - 15)/7
 
-    days_in_year = [d1 + datetime.timedelta(i) for i in range(delta.days+1)] #gives me a list with datetimes for each day a year
-    weekdays_in_year = [i.weekday() for i in days_in_year] #gives [0,1,2,3,4,5,6,0,1,2,3,4,5,6,…] (ticktext in xaxis dict translates this to weekdays
+    days_in_year = [d1 + datetime.timedelta(i) for i in range(delta.days+1)]
+
+    days_in_year[:len(days)] = days
+
+    week_num = [int(i.strftime("%V")) for i in days_in_year]
+
+    weekday_num = [i.weekday() for i in days_in_year]
     
-    weeknumber_of_dates = [int(i.strftime("%V")) if not (int(i.strftime("%V")) == 1 and i.month == 12) else 53
-                           for i in days_in_year] #gives [1,1,1,1,1,1,1,2,2,2,2,2,2,2,…] name is self-explanatory
+    hovertemplate = (
+    # TODO: Figure out how to add date to this template
+    "<b>Mood:</b> %{z}<br>" +
+    "<b>Journal:</b> %{text}<br>" )
 
     data = [
         go.Heatmap(
-            x=weeknumber_of_dates,
-            y=weekdays_in_year,
+            x=week_num,
+            y=weekday_num,
             z=data,
             text=daily_entries,
-            hoverinfo=['text','z'],
-            #hovertext=['text',data],
-            xgap=3, # this
-            ygap=3, # and this is used to make the grid-like apperance
+            hovertemplate = hovertemplate,
+            xgap=3,
+            ygap=3, 
             showscale=False,
             colorscale=[(0,"blue"), (0.5,"white"),(1,"red")] 
-        )
-    ]
+            )
+        ]
     
+    # Create monthly separation lines.
     kwargs = dict(
         mode='lines',
         line=dict(
             color='#9e9e9e',
             width=1
-        ),
-        hoverinfo='skip'
-        
-    )
+            ),
+        )
+
     for date, dow, wkn in zip(days_in_year,
-                                weekdays_in_year,
-                                weeknumber_of_dates):
+                                weekday_num,
+                                week_num):
         if date.day == 1:
             data += [
-                go.Scatter(
-                    x=[wkn-.5, wkn-.5],
-                    y=[dow-.5, 6.5],
-                    **kwargs
-                )
-            ]
+                    go.Scatter(
+                        x=[wkn-.5, wkn-.5],
+                        y=[dow-.5, 6.5],
+                        **kwargs
+                        )
+                ]
             if dow:
                 data += [
-                go.Scatter(
-                    x=[wkn-.5, wkn+.5],
-                    y=[dow-.5, dow - .5],
-                    **kwargs
-                ),
-                go.Scatter(
-                    x=[wkn+.5, wkn+.5],
-                    y=[dow-.5, -.5],
-                    **kwargs
-                )
-            ]
-                    
-                    
+                    go.Scatter(
+                        x=[wkn-.5, wkn+.5],
+                        y=[dow-.5, dow - .5],
+                        **kwargs
+                        ),
+                    go.Scatter(
+                        x=[wkn+.5, wkn+.5],
+                        y=[dow-.5, -.5],
+                        **kwargs
+                        )
+                    ]
+                        
     layout = go.Layout(
         title='activity chart',
         height=250,
@@ -104,24 +120,23 @@ def display_year(journal_tuples: list,
         showlegend=False
     )
 
-    if fig is None:
-        fig = go.Figure(data=data, layout=layout)
-    else:
-        fig.add_traces(data, rows=[(row+1)]*len(data), cols=[1]*len(data))
-        fig.update_layout(layout)
-        fig.update_xaxes(layout['xaxis'])
-        fig.update_yaxes(layout['yaxis'])
+    # Update Plotly graph object to append annual calendar subplot.
+    fig.add_traces(data, rows=[(row+1)]*len(data), cols=[1]*len(data))
+    fig.update_layout(layout)
+    fig.update_xaxes(layout['xaxis'])
+    fig.update_yaxes(layout['yaxis'])
 
     return fig
 
 
 def journal_calendar(journal_tuples):
     """
+    Plots a calendar of journal data with each year as a subplot.
 
     Args:
-        journal_tuples:
+        journal_tuples: A list of tuples containing journal data.
     Returns:
-        fig:
+        fig: A plotly graph object.
     """
 
     years = list(set([int(tup[0].split('-')[0]) for tup in journal_tuples]))
@@ -130,6 +145,6 @@ def journal_calendar(journal_tuples):
     
     for i, year in enumerate(years):
         data = [tup for tup in journal_tuples if int(tup[0].split('-')[0]) == year]
-        display_year(data, year=year, fig=fig,row=i)
+        annual_subplot(data, year=year,fig=fig,row=i)
         fig.update_layout(height=250*len(years))
     return fig

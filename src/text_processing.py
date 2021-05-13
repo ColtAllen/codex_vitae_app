@@ -37,29 +37,7 @@ class reMarkableParsing:
         clean_text = text.replace("--Sent from my reMarkable paper tabletGet yours at www.remarkable.comPS: You cannot reply to this email'","")
 
         return clean_text
-
-    def mood_rating(self, text: str) -> float:
-        """Extracts mood rating from journal entry, accounting for spacing inconsistencies.
-
-        Args:
-            text: A string of cleaned text containing mood rating.
-
-        Returns:
-            rating: Mood rating as a float.
-        """
-
-        try:
-            p = re.compile(r'Mood: \d')
-            rating =  float(p.search(text).group().split(":")[1])
-        except AttributeError:
-            p = re.compile(r'Mood:\d')
-            rating =  float(p.search(text).group().split(":")[1])
-        
-        finally:
-            pass
-
-        return rating
-
+    
     def journal_date(self, text: str):
         """Extracts date of journal entry and converts to datetime format.
 
@@ -73,6 +51,30 @@ class reMarkableParsing:
 
         return date_
 
+    def mood_rating(self, text: str) -> float:
+        """Extracts mood rating from journal entry, accounting for spacing inconsistencies.
+
+        Args:
+            text: A string of cleaned text containing mood rating.
+
+        Returns:
+            rating: Mood rating as a float.
+        """
+
+        # TODO: re.compile(r'Mood:)
+        #       float(p.search(text).group().rtrim().split(":")[0][0])
+        try:
+            p = re.compile(r'Mood: \d')
+            rating =  float(p.search(text).group().split(":")[1])
+        except AttributeError:
+            p = re.compile(r'Mood:\d')
+            rating =  float(p.search(text).group().split(":")[1])
+        
+        finally:
+            pass
+
+        return rating
+
     def journal_entry(self, text: str) -> str:
         """Extracts journal entry from cleaned text.
 
@@ -82,6 +84,7 @@ class reMarkableParsing:
             entry: A string of journal entry.
         """
 
+        # TODO: str(text.split(":")[1]).ltrim().[1:]
         entry = str(text.split(":")[1])[2:]
 
         return entry
