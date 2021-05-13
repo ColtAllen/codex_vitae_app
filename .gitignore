@@ -1,12 +1,8 @@
 /.vscode
 /config
 /data
-/diagram.py
-/exist_extract_mood_chart.html
 /notebooks
-/tutorials
-api_wrangling.ipynb
+diagram.py
 codex_vitae.ipynb
 mood_markov.ipynb
-mynetdiary_parsing.ipynb
 run_etl.sh
