@@ -1,14 +1,45 @@
+import os
+
 from flask import Flask, render_template
-from plotly_charts import journal_calendar
+
+#from data_viz import journal_calendar
 
 
-app = Flask(__name__)
+def create_app(test_config=None):
+    # create and configure the app
+    app = Flask(__name__, instance_relative_config=True)
+    app.config.from_mapping(
+        SECRET_KEY='dev',
+        DATABASE=os.path.join(app.instance_path, 'db.sqlite'),
+    )
 
-@app.route('/codex-vitae')
-def index():
-    return render_template('index.html') 
+    if test_config is None:
+        # load the instance config, if it exists, when not testing
+        app.config.from_pyfile('config.py', silent=True)
+    else:
+        # load the test config if passed in
+        app.config.from_mapping(test_config)
 
-def index():
+    # ensure the instance folder exists
+    try:
+        os.makedirs(app.instance_path)
+    except OSError:
+        pass
 
-    journal_calendar = journal_calendar()
-    return render_template('index.html', plot=journal_calendar)
+    @app.route('/')
+    def index():
+
+        return('App Factory Creation Test Successful!')
+
+
+    # @app.route('/codex-vitae')
+    # def index():
+
+    #     journal_plot = data_viz.journal_calendar(journal_tuples)
+
+    #     return render_template('index.html', plot=journal_plot)
+
+    return app
+
+
+    
