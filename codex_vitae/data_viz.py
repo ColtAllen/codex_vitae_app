@@ -2,15 +2,17 @@ import datetime
 import numpy as np
 import json
 
-import plotly
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
+from plotly.utils import PlotlyJSONEncoder
+
+import pandas as pd
 
 
-def annual_subplot(journal_tuples: list,
-                 year: int,
-                 fig, object,
-                 row: int = None):
+def annual_subplot(journal_tuples,
+                 year,
+                 fig,
+                 row=None):
     """
     Plots one year of journal data in a calendar format.
 
@@ -19,6 +21,7 @@ def annual_subplot(journal_tuples: list,
         year: An int of the year to the plotted.
         fig: An existing Plotly graph object.
         row: int = A row index for updated the figure subplot.
+
     Returns:
         fig: Appended plotly graph object.
     """
@@ -48,9 +51,10 @@ def annual_subplot(journal_tuples: list,
     weekday_num = [i.weekday() for i in days_in_year]
     
     hovertemplate = (
-    # TODO: Figure out how to add date to this template
+    "<b>Date:</b> %{customdata}<br>" +
     "<b>Mood:</b> %{z}<br>" +
-    "<b>Journal:</b> %{text}<br>" )
+    "<b>Journal:</b> %{text}<br><extra></extra>"
+    )
 
     data = [
         go.Heatmap(
@@ -59,16 +63,19 @@ def annual_subplot(journal_tuples: list,
             z=data,
             text=daily_entries,
             hovertemplate = hovertemplate,
+            customdata=[tup[0] for tup in journal_tuples], # Display date.
             xgap=3,
             ygap=3, 
             showscale=False,
-            colorscale=[(0,"blue"), (0.5,"white"),(1,"red")] 
+            colorscale=[(0,"blue"), (0.5,"white"),(1,"red")],
+            zmid=0,
             )
         ]
     
     # Create monthly separation lines.
     kwargs = dict(
         mode='lines',
+        hoverinfo='skip',
         line=dict(
             color='#9e9e9e',
             width=1
@@ -150,7 +157,6 @@ def journal_calendar(journal_tuples):
         annual_subplot(data, year=year,fig=fig,row=i)
         fig.update_layout(height=250*len(years))
     
-    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    graphJSON = json.dumps(fig, cls=PlotlyJSONEncoder)
 
     return graphJSON
-    

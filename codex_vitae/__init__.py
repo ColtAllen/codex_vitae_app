@@ -2,7 +2,7 @@ import os
 
 from flask import Flask, render_template
 
-#from data_viz import journal_calendar
+from data_viz import journal_calendar
 
 
 def create_app(test_config=None):
