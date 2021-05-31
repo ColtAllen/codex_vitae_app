@@ -84,8 +84,9 @@ class reMarkableParsing:
             entry: A string of journal entry.
         """
 
-        # TODO: str(text.split(":")[1]).ltrim().[1:]
+        # TODO: str(text.split(":")[1]).ltrim()[1:]
         entry = str(text.split(":")[1])[2:]
+        entry = str(text.split(":")[1]).strip()[2:]
 
         return entry
     
