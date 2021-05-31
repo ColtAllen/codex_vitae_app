@@ -6,5 +6,4 @@ diagram.py
 codex_vitae.ipynb
 mood_markov.ipynb
 journal.json
-app.py
 run_etl.sh

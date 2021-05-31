@@ -6,6 +6,9 @@ import os
 from contextlib import closing
 import json
 
+from datetime import date
+from dateutil.relativedelta import relativedelta
+
 import pandas as pd
 
 from db_module import db_create, db_historical, db_prod, db_insert
@@ -165,9 +168,14 @@ if __name__ == '__main__':
     # Perform API calls for production data.
     os.chdir(os.getenv('CONFIG'))
 
-    with authenticate_gmail_api(os.getenv('CREDENTIALS')) as service:
-        _remarkable = get_email_content(service,query="from:my@remarkable.com")
-        _mynetdiary = get_email_content(service,query="from:no-reply@mynetdiary.net")
+    # GMail API calls only return 100 results, so multiple calls must be made and appended together
+    date_ = str(date.today()-relativedelta(days=60))
+
+    with closing(authenticate_gmail_api(os.getenv('CREDENTIALS'))) as service:
+        _remarkable = get_email_content(service,query=f"from:my@remarkable.com,before:{date_}")
+        _remarkable_recent = get_email_content(service,query=f"from:my@remarkable.com,after:{date_}")
+        _remarkable.extend(_remarkable_recent)
+        _mynetdiary = get_email_content(service,query=f"from:no-reply@mynetdiary.net")
     
     _rescuetime = get_rescuetime_daily(os.getenv('API_KEY'))
 

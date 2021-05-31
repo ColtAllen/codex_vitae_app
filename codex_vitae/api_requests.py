@@ -43,7 +43,7 @@ def authenticate_gmail_api(credentials):
                 credentials, SCOPE)
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
-        with open('token.json', 'w') as token:
+        with closing(open('token.json', 'w')) as token:
             token.write(creds.to_json())
 
     service = build('gmail', 'v1', credentials=creds)
@@ -85,6 +85,8 @@ def get_email_content(service, query = None):
             body = service.users().messages().get(userId='me',id=email).execute().get('payload').get('body').get('data')
             body_list.append(body)
 
+    service.close()
+
     bytes_list = [bytes(str(x),encoding='utf-8') for x in body_list]
     decoded_list = [base64.urlsafe_b64decode(x) for x in bytes_list]
     str_list = [str(x) for x in decoded_list]
@@ -102,6 +104,7 @@ def get_rescuetime_daily(KEY):
         rescuetime_tuple: List of tuples containing daily total, productive, distracting, and neutral hours.
     """
 
+    # Append API key to API URL.
     url = f'https://www.rescuetime.com/anapi/daily_summary_feed?key={KEY}'
 
     with closing(requests.Session()) as session:
@@ -114,6 +117,7 @@ def get_rescuetime_daily(KEY):
         neut_hours = [day.get('neutral_hours') for day in iter_result]
 
         rescuetime_tuple = [(day,p,d,n) for (day,p,d,n) in zip(days,prod_hours,dist_hours,neut_hours)]
+        
         session.close()
 
     return rescuetime_tuple
