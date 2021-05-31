@@ -12,9 +12,9 @@ def test_remarkable():
     THEN the returned value of each method should match the specified format.
     """
 
-    raw = '<!DOCTYPE HTML PUBLIC>\\r\\n<html><head></head><body>Sat, Jan 1,2022\\r\\n<p>Mood:5 </p>This is a sample journal entry for unit testing. </p></body>--<br>Sent from my reMarkable paper tablet<br>Get yours at www.remarkable.com<br><br>PS: You cannot reply to this email<br>\\r\\n\''
+    raw = '<!DOCTYPE HTML PUBLIC>\\r\\n<html><head></head><body>Sat, Jan 1,2022\\r\\n<p>Mood: 5 </p>This is a sample journal entry for unit testing. </p></body>--<br>Sent from my reMarkable paper tablet<br>Get yours at www.remarkable.com<br><br>PS: You cannot reply to this email<br>\\r\\n\''
     
-    clean = 'Sat, Jan 1,2022Mood:5 This is a sample journal entry for unit testing. '
+    clean = 'Sat, Jan 1,2022Mood: 5 This is a sample journal entry for unit testing. '
     date_ = datetime.date(2022, 1, 1)
     rating = 5.0
     entry = 'This is a sample journal entry for unit testing.'

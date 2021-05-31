@@ -61,17 +61,7 @@ class reMarkableParsing:
             rating: Mood rating as a float.
         """
 
-        # TODO: re.compile(r'Mood:)
-        #       float(p.search(text).group().rtrim().split(":")[0][0])
-        try:
-            p = re.compile(r'Mood: \d')
-            rating =  float(p.search(text).group().split(":")[1])
-        except AttributeError:
-            p = re.compile(r'Mood:\d')
-            rating =  float(p.search(text).group().split(":")[1])
-        
-        finally:
-            pass
+        rating = float(text.split(":")[1].strip()[0])
 
         return rating
 
@@ -84,9 +74,7 @@ class reMarkableParsing:
             entry: A string of journal entry.
         """
 
-        # TODO: str(text.split(":")[1]).ltrim()[1:]
-        entry = str(text.split(":")[1])[2:]
-        entry = str(text.split(":")[1]).strip()[2:]
+        entry = str(text.split(":")[1]).strip()[1:].strip()
 
         return entry
     
