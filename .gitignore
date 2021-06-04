@@ -4,7 +4,7 @@
 /notebooks
 diagram.py
 /codex_vitae/orm_module.py
-/codex_vitae/app.py
+app.py
 /codex_vitae/codex_vitae.ipynb
 mood_markov.ipynb
 journal.json
