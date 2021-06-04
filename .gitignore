@@ -3,6 +3,8 @@
 /data
 /notebooks
 diagram.py
+orm_module.py
+app.py
 codex_vitae.ipynb
 mood_markov.ipynb
 journal.json

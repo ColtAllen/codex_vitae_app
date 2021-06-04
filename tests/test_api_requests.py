@@ -12,7 +12,7 @@ from datetime import date
 import datetime
 from dateutil.relativedelta import relativedelta
 
-from api_requests import authenticate_gmail_api, get_email_content, get_rescuetime_daily
+from codex_vitae.api_requests import authenticate_gmail_api, get_email_content, get_rescuetime_daily
 
 
 def test_authenticate_gmail_api():
@@ -26,7 +26,7 @@ def test_authenticate_gmail_api():
 
     service = authenticate_gmail_api(os.getenv('CREDENTIALS'))
 
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(google.auth.exceptions.RefreshError):
         pytest.exit('GMail token has expired.')
 
     service.close()

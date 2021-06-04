@@ -8,9 +8,9 @@ import pytest
 
 import datetime
 
-from text_processing import reMarkableParsing, fitness_parsing, nutrition_parsing
+from codex_vitae.text_processing import reMarkableParsing, fitness_parsing, nutrition_parsing
 
-os.getenv('APP_DIR')
+#os.getenv('APP_DIR')
 
 with open('test_mynetdiary.txt', 'r') as f:
         mynetdiary = f.read()
@@ -23,7 +23,7 @@ def test_remarkable():
     THEN the returned value of each method should match the required format.
     """
 
-    os.getenv('APP_DIR')
+    #os.getenv('APP_DIR')
 
     with open('test_remarkable.txt', 'r') as f:
         raw = f.read()

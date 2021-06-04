@@ -25,10 +25,11 @@ from data_viz import journal_calendar
 
 # Configuration
 # TODO: Test behavior of 'None' default argument
-GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID',None)
-GOOGLE_CLIENT_SECRET =  os.getenv('GOOGLE_CLIENT_SECRET',None)
+GOOGLE_CLIENT_ID = '1019965335909-r2ag5oh1a7pimm7g3nk1bp9sk0i9nmnv.apps.googleusercontent.com'
+GOOGLE_CLIENT_SECRET =  'dB3hZfevu4OUvNsqRIvf_ITP'
 # TODO: Verify this doesn't need parenthesis and/or double quotes
 GOOGLE_DISCOVERY_URL = 'https://accounts.google.com/.well-known/openid-configuration'
+DB_PATH = '/mnt/c/Users/colta/portfolio/codex_vitae_app/data/db'
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY") or os.urandom(24)
@@ -146,7 +147,7 @@ def codex_vitae():
 
     #Connect to SQLite DB and plot journal entries.
 
-    con = sqlite3.connect(os.getenv('DB_PATH'))
+    con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
     cur.execute("select * from journal_view order by date")
     journal_tuples = cur.fetchall()
@@ -158,4 +159,4 @@ def codex_vitae():
 
 
 if __name__ == '__main__':
-    app.run(ssl_context="adhoc")
+    app.run(ssl_context="adhoc",debug=True)
