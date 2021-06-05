@@ -170,7 +170,8 @@ if __name__ == '__main__':
 
     # GMail API calls only return 100 results, so multiple calls must be made and appended together
     date_ = str(date.today()-relativedelta(days=60))
-
+    date_ = str(datetime.date(2021, 4, 1))
+    
     with closing(authenticate_gmail_api(os.getenv('CREDENTIALS'))) as service:
         _remarkable = get_email_content(service,query=f"from:my@remarkable.com,before:{date_}")
         _remarkable_recent = get_email_content(service,query=f"from:my@remarkable.com,after:{date_}")

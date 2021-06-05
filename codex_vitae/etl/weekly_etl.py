@@ -28,14 +28,21 @@ _rescuetime = get_rescuetime_daily(os.getenv('API_KEY'))
 
 # Convert reMarkable and MyNetDiary data into tuple generators.
 _remarkable = reMarkableParsing().run(_remarkable)
-_fitness = fitness_parsing(_mynetdiary)
-_nutrition = nutrition_parsing(_mynetdiary)
 
-_prod_list = [_rescuetime,
-                _remarkable,
-                _fitness,
-                _nutrition,
-            ]
+if _mynetdiary is not None:
+    _fitness = fitness_parsing(_mynetdiary)
+    _nutrition = nutrition_parsing(_mynetdiary)
+
+    _prod_list = [_rescuetime,
+                  _remarkable,
+                  _fitness,
+                  _nutrition,
+                  ]
+
+else:
+    _prod_list = [_rescuetime,
+                  _remarkable,
+                  ]
 
 # Insert into DB and create backup files.
 db_prod(os.getenv('DB_PATH'), _prod_list)

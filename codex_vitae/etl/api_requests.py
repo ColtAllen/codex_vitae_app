@@ -50,6 +50,7 @@ def authenticate_gmail_api(credentials):
 
     return service
 
+
 def get_email_content(service, query = None):
     """Use the GMail API to query email bodies and decode into string format.
 
@@ -65,33 +66,37 @@ def get_email_content(service, query = None):
     emails = service.users().messages().list(userId='me',q=query, maxResults=101,includeSpamTrash=False).execute()
     emails = emails.get('messages')
 
-    id_list = [id['id'] for id in emails]
+    if emails is not None:
 
-    body_list = []
+        id_list = [id['id'] for id in emails]
 
-    # Check for container MIME message parts.
-    body = service.users().messages().get(userId='me',id=id_list[0]).execute().get('payload').get('body').get('data')
+        body_list = []
 
-    if body == None:
-        for email in id_list:
-            body = service.users().messages().get(userId='me',id=email).execute().get('payload').get('parts')
-            text = body[0].get('body').get('data')
-            html = body[1].get('body').get('data')
-            body = tuple((text,html))
-            body_list.append(html)
-        
-    else:
-        for email in id_list:
-            body = service.users().messages().get(userId='me',id=email).execute().get('payload').get('body').get('data')
-            body_list.append(body)
+        # Check for container MIME message parts.
+        body = service.users().messages().get(userId='me',id=id_list[0]).execute().get('payload').get('body').get('data')
+
+        if body == None:
+            for email in id_list:
+                body = service.users().messages().get(userId='me',id=email).execute().get('payload').get('parts')
+                text = body[0].get('body').get('data')
+                html = body[1].get('body').get('data')
+                body = tuple((text,html))
+                body_list.append(html)
+            
+        else:
+            for email in id_list:
+                body = service.users().messages().get(userId='me',id=email).execute().get('payload').get('body').get('data')
+                body_list.append(body)
+
+        bytes_list = [bytes(str(x),encoding='utf-8') for x in body_list]
+        decoded_list = [base64.urlsafe_b64decode(x) for x in bytes_list]
+        str_list = [str(x) for x in decoded_list]
+
+        return str_list
 
     service.close()
-
-    bytes_list = [bytes(str(x),encoding='utf-8') for x in body_list]
-    decoded_list = [base64.urlsafe_b64decode(x) for x in bytes_list]
-    str_list = [str(x) for x in decoded_list]
         
-    return str_list
+    
 
 
 def get_rescuetime_daily(KEY):
@@ -117,8 +122,7 @@ def get_rescuetime_daily(KEY):
         neut_hours = [day.get('neutral_hours') for day in iter_result]
 
         rescuetime_tuple = [(day,p,d,n) for (day,p,d,n) in zip(days,prod_hours,dist_hours,neut_hours)]
-        
-        session.close()
+
+    session.close()
 
     return rescuetime_tuple
-    

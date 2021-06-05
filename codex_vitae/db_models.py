@@ -1,10 +1,14 @@
+import os
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Text, Float, Integer, Date
 
+DB_URL = os.getenv('DB_URL')
+
 # create an engine
-engine = create_engine('postgresql://usr:pass@localhost:5432/sqlalchemy')
+engine = create_engine(DB_URL)
 
 # create a configured "Session" class
 Session = sessionmaker(bind=engine)
@@ -293,7 +297,7 @@ class MoodCharts(Base):
 
 
 class BulletJournal(Base):
-    __tablename__ = 'exist_journal'
+    __tablename__ = 'bullet_journal'
 
     date = Column(Date, primary_key=True)
     mood = Column(Float)

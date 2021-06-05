@@ -108,7 +108,7 @@ def annual_subplot(journal_tuples,
                     ]
                         
     layout = go.Layout(
-        title='activity chart',
+        # title='activity chart',
         height=250,
         yaxis=dict(
             showline=False, showgrid=False, zeroline=False,
@@ -158,5 +158,8 @@ def journal_calendar(journal_tuples):
         fig.update_layout(height=250*len(years))
     
     graphJSON = json.dumps(fig, cls=PlotlyJSONEncoder)
+    # TODO: Make this a CLI command as part of the javascript refactoring.
+    # journal_json = json.loads(graphJSON)
 
     return graphJSON
+
