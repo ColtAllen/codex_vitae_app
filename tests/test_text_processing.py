@@ -6,7 +6,7 @@ import os
 import pytest
 import datetime
 
-from codex_vitae.text_processing import reMarkableParsing, fitness_parsing, nutrition_parsing
+from codex_vitae.etl.text_processing import reMarkableParsing, fitness_parsing, nutrition_parsing
 
 
 with open('test_remarkable.txt', 'r') as f:

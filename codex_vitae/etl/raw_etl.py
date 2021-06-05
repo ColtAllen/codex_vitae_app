@@ -6,6 +6,7 @@ import os
 from contextlib import closing
 import json
 
+import datetime
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
@@ -169,7 +170,7 @@ if __name__ == '__main__':
     os.chdir(os.getenv('CONFIG'))
 
     # GMail API calls only return 100 results, so multiple calls must be made and appended together
-    date_ = str(date.today()-relativedelta(days=60))
+    #date_ = str(date.today()-relativedelta(days=60))
     date_ = str(datetime.date(2021, 4, 1))
     
     with closing(authenticate_gmail_api(os.getenv('CREDENTIALS'))) as service:
@@ -201,5 +202,5 @@ if __name__ == '__main__':
 
     # Create DB and perform insertions.
     db_create(os.getenv('DB_PATH'))
-    db_historical(os.getenv('DB_PATH'), _hist_list)
     db_prod(os.getenv('DB_PATH'), _prod_list)
+    db_historical(os.getenv('DB_PATH'), _hist_list)

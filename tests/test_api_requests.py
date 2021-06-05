@@ -9,7 +9,7 @@ from contextlib import closing
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
-from codex_vitae.api_requests import authenticate_gmail_api, get_email_content, get_rescuetime_daily
+from codex_vitae.etl.api_requests import authenticate_gmail_api, get_email_content, get_rescuetime_daily
 
 
 def test_get_email_content():
