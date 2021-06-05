@@ -333,3 +333,20 @@ class BulletJournal(Base):
         self.learn = learn
         self.write = write
         self.guitar = guitar
+
+
+class JournalProd(Base):
+    __tablename__ = 'journal_prod'
+
+    date = Column(Date, primary_key=True)
+    mood = Column(Float)
+    entry = Column(Text)
+
+
+class RescueTimeProd(Base):
+    __tablename__ = 'rescuetime_prod'
+
+    date = Column(Date, primary_key=True)
+    prd_hours = Column(Float)
+    dst_hours = Column(Float)
+    neut_hours = Column(Float)
