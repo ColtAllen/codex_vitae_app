@@ -11,6 +11,6 @@ mood_markov.ipynb
 journal.json
 run_etl.sh
 token.json
-/codex_vitae/__pycache__
-/tests/__pycache__
-/codex_vitae/etl/__pycache__
+/codex_vitae/__pycache_/
+/tests/__pycache__/
+/codex_vitae/etl/__pycache__/
