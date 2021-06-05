@@ -5,7 +5,7 @@
 diagram.py
 /codex_vitae/orm_module.py
 /codex_vitae/app.py
-/codex_vitae/etl/raw_etl.py
+./codex_vitae/etl/raw_etl.py
 app.py
 /codex_vitae/codex_vitae.ipynb
 mood_markov.ipynb
