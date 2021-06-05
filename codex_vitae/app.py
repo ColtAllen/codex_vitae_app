@@ -25,11 +25,12 @@ from data_viz import journal_calendar
 
 # Configuration
 # TODO: Test behavior of 'None' default argument
-GOOGLE_CLIENT_ID = '1019965335909-r2ag5oh1a7pimm7g3nk1bp9sk0i9nmnv.apps.googleusercontent.com'
-GOOGLE_CLIENT_SECRET =  'dB3hZfevu4OUvNsqRIvf_ITP'
+GOOGLE_CLIENT_ID = os.getenv("CLIENT_ID")
+GOOGLE_CLIENT_SECRET =  os.getenv("CLIENT_SECRET")
 # TODO: Verify this doesn't need parenthesis and/or double quotes
 GOOGLE_DISCOVERY_URL = 'https://accounts.google.com/.well-known/openid-configuration'
-DB_PATH = '/mnt/c/Users/colta/portfolio/codex_vitae_app/data/db'
+DB_PATH = os.getenv("DB_PATH")
+DB_URL = os.getenv("DB_URL")
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY") or os.urandom(24)
