@@ -4,33 +4,28 @@ import datetime
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Text, Float, Integer, Date
+#from sqlalchemy.ext.declarative import declarative_base
+#from sqlalchemy import Column, Text, Float, Integer, Date
 
-from orm_models import Base, MoodCharts, BulletJournal, ExistJournal, reMarkable, JournalProd, RescueTimeProd
-
+from etl.orm_models import Base, MoodCharts, BulletJournal, ExistJournal, reMarkable, JournalProd, RescueTimeProd
 
 # Declare environment variables.
 DB_URL = os.getenv('DB_URL')
-os.chdir(os.getenv('DIR'))
+DIR = os.getenv('DIR')
 
-# TODO: Rewrite this so that it plays well with connection methods in mysql_module.py
 def orm_init():
     """Create SQLAlchemy session for DB activities."""
+    
+    return create_engine(DB_URL)
 
-    engine = create_engine(DB_URL)
+
+def insert_mood_charts(engine=orm_init()):
+
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
 
-    return session
-
-
-def insert_mood_charts(session=orm_init()):
-
-    session = session
-
-    with open('mood_charts.csv', 'r') as f:
+    with open(f"{DIR}/mood_charts.csv", 'r') as f:
         csv_reader = csv.DictReader(f)
 
         for row in csv_reader:
@@ -47,11 +42,13 @@ def insert_mood_charts(session=orm_init()):
     session.close()
 
 
-def insert_bullet_journal(session=orm_init()):
+def insert_bullet_journal(engine=orm_init()):
 
-    session = session
+    Base.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
 
-    with open('bullet_journal.csv', 'r') as f:
+    with open(f"{DIR}/bullet_journal.csv", 'r') as f:
         csv_reader = csv.DictReader(f)
 
         for row in csv_reader:
@@ -77,11 +74,13 @@ def insert_bullet_journal(session=orm_init()):
     session.close()
 
 
-def insert_exist_journal(session=orm_init()):
+def insert_exist_journal(engine=orm_init()):
 
-    session = session
+    Base.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
 
-    with open('exist_journal.csv', 'r') as f:
+    with open(f"{DIR}/exist_journal.csv", 'r') as f:
         csv_reader = csv.DictReader(f)
 
         for row in csv_reader:
@@ -96,11 +95,13 @@ def insert_exist_journal(session=orm_init()):
     session.close()
 
 
-def insert_remarkable(session=orm_init()):
+def insert_remarkable(engine=orm_init()):
 
-    session = session
+    Base.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
 
-    with open('remarkable.csv', 'r') as f:
+    with open(f"{DIR}/remarkable.csv", 'r') as f:
         csv_reader = csv.DictReader(f)
 
         for row in csv_reader:
@@ -115,11 +116,13 @@ def insert_remarkable(session=orm_init()):
     session.close()
 
 
-def insert_journal_prod(session=orm_init()):
+def insert_journal_prod(engine=orm_init()):
 
-    session = session
+    Base.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
 
-    with open('journal_prod.csv', 'r') as f:
+    with open(f"{DIR}/journal_prod.csv", 'r') as f:
         csv_reader = csv.DictReader(f)
 
         for row in csv_reader:
@@ -134,11 +137,13 @@ def insert_journal_prod(session=orm_init()):
     session.close()
 
 
-def insert_rescuetime_prod(session=orm_init()):
+def insert_rescuetime_prod(engine=orm_init()):
 
-    session = session
+    Base.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
 
-    with open('rescuetime_prod.csv', 'r') as f:
+    with open(f"{DIR}/rescuetime_prod.csv", 'r') as f:
         csv_reader = csv.DictReader(f)
 
         for row in csv_reader:

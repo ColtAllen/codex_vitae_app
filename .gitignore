@@ -2,6 +2,7 @@
 /config
 /data
 /notebooks
+/instance
 diagram.py
 orm_module.py
 /codex_vitae/orm_module.py

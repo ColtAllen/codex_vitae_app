@@ -3,9 +3,10 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import json
 import os
+import logging
 import sqlite3
+import json
 
 # Third-party libraries
 from flask import Flask, redirect, request, url_for, render_template
@@ -20,20 +21,38 @@ from oauthlib.oauth2 import WebApplicationClient
 import requests
 
 # Internal imports
+from gcp_utils import init_connection_engine
+from etl.db_module import insert_journal_prod, insert_rescuetime_prod
 from data_viz import journal_calendar
 
 
 # Configuration
-# TODO: Test behavior of 'None' default argument
 GOOGLE_CLIENT_ID = os.getenv("CLIENT_ID")
 GOOGLE_CLIENT_SECRET =  os.getenv("CLIENT_SECRET")
-# TODO: Verify this doesn't need parenthesis and/or double quotes
+
 GOOGLE_DISCOVERY_URL = 'https://accounts.google.com/.well-known/openid-configuration'
 DB_PATH = os.getenv("DB_PATH")
 DB_URL = os.getenv("DB_URL")
 
+logger = logging.getLogger()
+
+# This global variable is declared with a value of `None`, instead of calling
+# `init_connection_engine()` immediately, to simplify testing. In general, it
+# is safe to initialize your database connection pool when your script starts
+# -- there is no need to wait for the first request.
+db = None
+
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY") or os.urandom(24)
+
+@app.before_first_request
+def create_tables():
+    global db
+    db = db or init_connection_engine()
+    # Create tables (if they don't already exist)
+    insert_journal_prod(db)
+    insert_rescuetime_prod(db)
+    
 
 # User session management setup
 # https://flask-login.readthedocs.io/en/latest
@@ -146,16 +165,14 @@ def logout():
 @app.route('/codex-vitae')
 def codex_vitae():
 
-    #Connect to SQLite DB and plot journal entries.
-
-    con = sqlite3.connect(DB_PATH)
-    cur = con.cursor()
-    cur.execute("select * from journal_view order by date")
-    journal_tuples = cur.fetchall()
-    con.close()
+    # Connect to DB and plot journal entries.
+    with db.connect() as conn:
+        journal_tuples = conn.execute(
+                                      "select * from journal_prod order by date"
+                                      ).fetchall()
 
     journal = journal_calendar(journal_tuples)
-    
+
     return render_template('index.html', plot=journal)
 
 
