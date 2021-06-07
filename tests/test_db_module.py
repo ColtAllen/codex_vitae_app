@@ -10,4 +10,4 @@ from datetime import date
 import datetime
 from dateutil.relativedelta import relativedelta
 
-from codex_vitae.etl.db_module import db_prod, db_backup
+from codex_vitae.etl.sqlite3_module import db_prod, db_backup

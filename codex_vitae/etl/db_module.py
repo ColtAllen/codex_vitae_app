@@ -157,3 +157,10 @@ def insert_rescuetime_prod(engine=orm_init()):
 
     session.commit()
     session.close()
+
+
+def etl_init():
+    """# Create tables (if they don't already exist)"""
+    orm_init()
+    insert_journal_prod(db)
+    insert_rescuetime_prod(db)

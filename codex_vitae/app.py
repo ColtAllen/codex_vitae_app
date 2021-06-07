@@ -45,15 +45,6 @@ db = None
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY") or os.urandom(24)
 
-@app.before_first_request
-def create_tables():
-    global db
-    db = db or init_connection_engine()
-    # Create tables (if they don't already exist)
-    insert_journal_prod(db)
-    insert_rescuetime_prod(db)
-    
-
 # User session management setup
 # https://flask-login.readthedocs.io/en/latest
 login_manager = LoginManager()
@@ -72,22 +63,6 @@ def load_user(user_id):
 # TODO: Add error handling
 def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json()
-
-
-# @app.route('/')
-# def index():
-
-#     if current_user.is_authenticated:
-#         return (
-#             "<p>Hello, {}! You're logged in! Email: {}</p>"
-#             "<div><p>Google Profile Picture:</p>"
-#             '<img src="{}" alt="Google profile pic"></img></div>'
-#             '<a class="button" href="/logout">Logout</a>'.format(
-#                 current_user.name, current_user.email, current_user.profile_pic
-#             )
-#         )
-#     else:
-#         return '<a class="button" href="/login">Google Login</a>'
 
 
 @app.route("/")
@@ -155,9 +130,9 @@ def callback():
     return redirect(url_for("codex_vitae"))
 
 
-@app.route("/logout")
 @login_required
 def logout():
+    #if current_user.is_authenticated:
     logout_user()
     return redirect(url_for("login"))
 
@@ -166,6 +141,9 @@ def logout():
 def codex_vitae():
 
     # Connect to DB and plot journal entries.
+    global db
+    db = db or init_connection_engine()
+
     with db.connect() as conn:
         journal_tuples = conn.execute(
                                       "select * from journal_prod order by date"
