@@ -160,7 +160,7 @@ def insert_rescuetime_prod(engine=orm_init()):
 
 
 def etl_init():
-    """# Create tables (if they don't already exist)"""
-    orm_init()
+    """Create tables (if they don't already exist)"""
+    db = orm_init()
     insert_journal_prod(db)
     insert_rescuetime_prod(db)
