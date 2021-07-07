@@ -9,10 +9,10 @@ import datetime
 from codex_vitae.etl.text_processing import reMarkableParsing, fitness_parsing, nutrition_parsing
 
 
-with open('test_remarkable.txt', 'r') as f:
+with open('tests/test_remarkable.txt', 'r') as f:
         _remarkable = f.read()
 
-with open('test_mynetdiary.txt', 'r') as f:
+with open('tests/test_mynetdiary.txt', 'r') as f:
         _mynetdiary = f.read()
 
 def test_remarkable(remarkable=_remarkable):

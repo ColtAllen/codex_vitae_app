@@ -14,7 +14,8 @@ from flask_login import (
     login_required,
     login_user,
     logout_user,
-)
+    UserMixin,
+    )
 from oauthlib.oauth2 import WebApplicationClient
 import requests
 
@@ -47,10 +48,20 @@ login_manager.init_app(app)
 # OAuth 2 client setup
 client = WebApplicationClient(GOOGLE_CLIENT_ID)
 
+# User class for flask-login
+class User(UserMixin):
+    def __init__(self, email):
+        self.id = email
+
+    @staticmethod
+    def get(user_id):
+        user = User(email=user_id)
+        return user
+
 # Flask-Login helper to retrieve a user from our db
 @login_manager.user_loader
 def load_user(user_id):
-    return user_id
+    return User.get(user_id)
 
 
 # TODO: Add error handling
@@ -69,7 +80,7 @@ def login():
         authorization_endpoint,
         redirect_uri=request.base_url + "login/callback",
         scope=["openid", "email", "profile"],
-    )
+        )
     return redirect(request_uri)
 
 
@@ -109,32 +120,40 @@ def callback():
     if userinfo_response.json()["email"] != EMAIL:
         return "User email not available or not verified by Google.", 400
 
+    user = User(email=EMAIL)
+
+    # Begin user session by logging the user in
+    login_user(user)
+
     # Send user to homepage if Google account is verified.
     return redirect(url_for("codex_vitae"))
 
 
 @login_required
+@app.route('/logout')
 def logout():
-    #if current_user.is_authenticated:
-    logout_user()
-    return redirect(url_for("login"))
+    if current_user.is_authenticated:
+        logout_user()
+        return redirect(url_for("login"))
 
 
+@login_required
 @app.route('/codex-vitae')
 def codex_vitae():
+    if current_user.is_authenticated:
+        # Connect to DB and plot journal entries.
+        global db
+        db = db or init_connection_engine()
 
-    # Connect to DB and plot journal entries.
-    global db
-    db = db or init_connection_engine()
+        with db.connect() as conn:
+            journal_tuples = conn.execute(
+                                        "select * from journal_prod order by date"
+                                        ).fetchall()
 
-    with db.connect() as conn:
-        journal_tuples = conn.execute(
-                                      "select * from journal_prod order by date"
-                                      ).fetchall()
+        journal = journal_calendar(journal_tuples)
 
-    journal = journal_calendar(journal_tuples)
-
-    return render_template('index.html', plot=journal)
+        return render_template('index.html', plot=journal)
+    return "Please Log In."
 
 
 if __name__ == '__main__':

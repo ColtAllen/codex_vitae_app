@@ -164,3 +164,7 @@ def etl_init():
     db = orm_init()
     insert_journal_prod(db)
     insert_rescuetime_prod(db)
+
+if __name__ == '__main__':
+
+    etl_init()
