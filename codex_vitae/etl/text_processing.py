@@ -47,8 +47,11 @@ class reMarkableParsing:
             date: Date as datetime type.
         """
 
-        date_ = parse(text.split("Mood")[0]).date()
-
+        try:
+            date_ = parse(text.split("Mood")[0]).date()    
+        except:
+            date_ = parse(text.split("mood")[0]).date()
+     
         return date_
 
     def mood_rating(self, text: str) -> float:

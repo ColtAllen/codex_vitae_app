@@ -10,7 +10,7 @@ from datetime import date
 import datetime
 from dateutil.relativedelta import relativedelta
 
-from sqlite3_module import db_prod, db_backup
+from sqlite_module import db_prod, db_backup
 from api_requests import authenticate_gmail_api, get_email_content, get_rescuetime_daily
 from text_processing import reMarkableParsing, fitness_parsing, nutrition_parsing
 
