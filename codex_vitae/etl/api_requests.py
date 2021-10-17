@@ -97,8 +97,6 @@ def get_email_content(service, query = None):
     service.close()
         
     
-
-
 def get_rescuetime_daily(KEY):
     """Use the RescueTime API to get daily totals for the past two weeks of time spent on personal digital devices.
     

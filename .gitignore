@@ -6,7 +6,6 @@
 diagram.py
 orm_module.py
 /codex_vitae/orm_module.py
-raw_etl.py
 sqlite3_module.py
 /codex_vitae/codex_vitae.ipynb
 mood_markov.ipynb

@@ -21,7 +21,7 @@ import requests
 
 # Internal imports
 from gcp_utils import init_connection_engine
-from etl.db_module import insert_journal_prod, insert_rescuetime_prod, etl_init
+from etl.orm_inserts import insert_journal_prod, insert_rescuetime_prod, etl_init
 from data_viz import journal_calendar
 
 

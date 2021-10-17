@@ -8,7 +8,7 @@ import sqlalchemy
 
 from flask import Flask, render_template, request
 
-from etl.db_module import orm_init, insert_journal_prod, insert_rescuetime_prod
+from etl.orm_inserts import orm_init, insert_journal_prod, insert_rescuetime_prod
 
 
 app = Flask(__name__)
