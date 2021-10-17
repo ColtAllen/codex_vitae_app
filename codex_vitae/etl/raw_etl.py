@@ -17,9 +17,9 @@ from text_processing import reMarkableParsing, fitness_parsing, nutrition_parsin
 
 
 # Configure Environment Variables.
-DIR = os.getenv('DIR')
-CONFIG = os.getenv('CONFIG')
-CREDENTIALS = os.getenv('CREDENTIALS')
+DATA_DIR = os.getenv('DIR')
+CRED_DIR = os.getenv('CONFIG')
+CRED = os.getenv('CREDENTIALS')
 API_KEY = os.getenv('API_KEY')
 
     
@@ -147,10 +147,10 @@ def to_tuple_gen(df):
 
 if __name__ == '__main__':
 
-    _df_list = exist_dataframes(DIR)
+    _df_list = exist_dataframes(DATA_DIR)
 
     # Change directory to where files will be written.
-    os.chdir(DIR)
+    os.chdir(DATA_DIR)
 
     # Convert dataframes into CSVs and tuple lists.
     _exist_rescuetime = _df_list[2].dropna()
@@ -182,7 +182,7 @@ if __name__ == '__main__':
     _bullet_journal = list(_bullet_journal.itertuples(index=False,name=None))
 
     # Perform API calls for production data.
-    os.chdir(CONFIG)
+    os.chdir(CRED_DIR)
 
     # GMail API calls only return 100 results, so multiple calls must be made and appended together
     date1_ = str(datetime.date(2021, 5, 1))
@@ -190,7 +190,7 @@ if __name__ == '__main__':
     date3_ = str(datetime.date(2021, 10, 25))
     date4_ = str(datetime.date(2022, 1, 18))
     
-    with closing(authenticate_gmail_api(CREDENTIALS)) as service:
+    with closing(authenticate_gmail_api(CRED)) as service:
         _remarkable = get_email_content(service,query=f"from:my@remarkable.com,before:{date1_}")
         _remarkable1 = get_email_content(service,query=f"from:my@remarkable.com,after:{date1_},before:{date2_}")
         _remarkable2 = get_email_content(service,query=f"from:my@remarkable.com,after:{date2_}")
@@ -220,12 +220,12 @@ if __name__ == '__main__':
                 ]
 
     # Create DB and perform insertions.
-    db = f'{DIR}/db'
+    db = f'{DATA_DIR}/db'
     db_create(db)
     db_prod(db, _prod_list)
     db_historical(db, _hist_list)
 
-    os.chdir(DIR)
+    os.chdir(DATA_DIR)
 
     # Update entries.
     con = sqlite3.connect(db)
