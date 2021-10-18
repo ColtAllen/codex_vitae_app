@@ -30,7 +30,6 @@ GOOGLE_CLIENT_ID = os.getenv("CLIENT_ID")
 GOOGLE_CLIENT_SECRET =  os.getenv("CLIENT_SECRET")
 
 GOOGLE_DISCOVERY_URL = 'https://accounts.google.com/.well-known/openid-configuration'
-DB_PATH = os.getenv("DB_PATH")
 DB_URL = os.getenv("DB_URL")
 EMAIL = os.getenv("EMAIL")
 

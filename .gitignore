@@ -11,5 +11,6 @@ sqlite3_module.py
 mood_markov.ipynb
 journal.json
 run_etl.sh
+run_app.sh
 token.json
 __pycache__

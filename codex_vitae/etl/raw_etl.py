@@ -17,9 +17,9 @@ from text_processing import reMarkableParsing, fitness_parsing, nutrition_parsin
 
 
 # Configure Environment Variables.
-DATA_DIR = os.getenv('DIR')
-CRED_DIR = os.getenv('CONFIG')
-CRED = os.getenv('CREDENTIALS')
+DATA_DIR = os.getenv('DATA_DIR')
+CRED_DIR = os.getenv('CRED_DIR')
+CRED = os.getenv('CRED')
 API_KEY = os.getenv('API_KEY')
 
     
