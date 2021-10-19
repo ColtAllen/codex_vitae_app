@@ -20,18 +20,19 @@ from oauthlib.oauth2 import WebApplicationClient
 import requests
 
 # Internal imports
-from gcp_utils import init_connection_engine
-from etl.orm_inserts import etl_init
+from etl.gcp_utils import init_connection_engine, access_secret
 from data_viz import journal_calendar
 
 
 # Configuration
-GOOGLE_CLIENT_ID = os.getenv("CLIENT_ID")
-GOOGLE_CLIENT_SECRET =  os.getenv("CLIENT_SECRET")
+PROJECT_ID = os.getenv("PROJECT_ID")
+
+GOOGLE_CLIENT_ID = access_secret(project_id=PROJECT_ID,secret_id="CLIENT_ID")
+GOOGLE_CLIENT_SECRET =  access_secret(project_id=PROJECT_ID,secret_id="CLIENT_SECRET")
 
 GOOGLE_DISCOVERY_URL = 'https://accounts.google.com/.well-known/openid-configuration'
-DB_URL = os.getenv("DB_URL")
-EMAIL = os.getenv("EMAIL")
+DB_URL = os.getenv('DB_URL')
+EMAIL = access_secret(project_id=PROJECT_ID,secret_id="EMAIL")
 
 # TODO: Resolve testing with this initial database declaration.
 db = None

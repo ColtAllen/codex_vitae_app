@@ -1,6 +1,7 @@
 import os
 
 from google.cloud import storage, secretmanager
+from etl.orm_inserts import orm_init
 
 import sqlalchemy
 
