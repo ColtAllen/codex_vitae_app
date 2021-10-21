@@ -11,7 +11,7 @@ from etl.orm_models import Base, MoodCharts, BulletJournal, ExistJournal, reMark
 
 # Declare environment variables.
 DB_URL = os.getenv('DB_URL')
-DIR = os.getenv('DIR')
+DIR = os.getenv('APP_DIR')
 
 def orm_init():
     """Create SQLAlchemy session for DB activities."""

@@ -1,19 +1,36 @@
-
-import logging
 import os
 
-from google.cloud import storage
+from google.cloud import storage, secretmanager
+from etl.orm_inserts import orm_init
 
 import sqlalchemy
 
-from flask import Flask, render_template, request
+os.environ["PROJECT_ID"] = "thinking-window-320523"
 
-from etl.orm_inserts import orm_init, insert_journal_prod, insert_rescuetime_prod
+def access_secret(project_id:str,secret_id:str, version_id='latest'):
+    """
+    Retrieve the value of a secret stored in Google Secret Manager.
 
+    Args:
+        project_id(str): Name of GCP project.
+        secret_id(str): Name of secret in Secret Manager
+        version_id(str): Secret version.
 
-app = Flask(__name__)
+    Returns:
+        Value of requested secret.
+    """
 
-logger = logging.getLogger()
+    # Create the Secret Manager client.
+    client = secretmanager.SecretManagerServiceClient()
+
+    # Build the resource name of the secret version.
+    name = f'projects/{project_id}/secrets/{secret_id}/versions/{version_id}'
+
+    # Access the secret version.
+    response = client.access_secret_version(name=name)
+
+    # Return the decoded payload.
+    return response.payload.data.decode('UTF-8')
 
 
 def init_connection_engine():
