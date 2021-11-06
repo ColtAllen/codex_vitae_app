@@ -6,6 +6,8 @@ from __future__ import print_function
 import os
 import json
 
+import sqlite3
+
 # Third-party libraries
 from flask import Flask, redirect, request, url_for, render_template
 from flask_login import (
@@ -27,15 +29,25 @@ from data_viz import journal_calendar
 # Configuration
 PROJECT_ID = os.getenv("PROJECT_ID")
 
-GOOGLE_CLIENT_ID = access_secret(project_id=PROJECT_ID,secret_id="CLIENT_ID")
-GOOGLE_CLIENT_SECRET =  access_secret(project_id=PROJECT_ID,secret_id="CLIENT_SECRET")
+try:
+    GOOGLE_CLIENT_ID = access_secret(project_id=PROJECT_ID,secret_id="CLIENT_ID")
+    GOOGLE_CLIENT_SECRET =  access_secret(project_id=PROJECT_ID,secret_id="CLIENT_SECRET")
+    EMAIL = access_secret(project_id=PROJECT_ID,secret_id="EMAIL")
 
-GOOGLE_DISCOVERY_URL = 'https://accounts.google.com/.well-known/openid-configuration'
-DB_URL = os.getenv('DB_URL')
-EMAIL = access_secret(project_id=PROJECT_ID,secret_id="EMAIL")
+except: # google.api_core.exceptions.PermissionDenied
+    GOOGLE_CLIENT_ID = os.getenv("CLIENT_ID")
+    GOOGLE_CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+    LOCAL_DB = os.getenv("LOCAL_DB")
+    EMAIL = os.getenv("EMAIL")
+
+finally:
+    GOOGLE_DISCOVERY_URL = 'https://accounts.google.com/.well-known/openid-configuration'
+    DB_URL = os.getenv('DB_URL')
+
 
 # TODO: Resolve testing with this initial database declaration.
 db = None
+db= sqlite3
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY") or os.urandom(24)
@@ -145,9 +157,9 @@ def codex_vitae():
         global db
         db = db or init_connection_engine()
 
-        with db.connect() as conn:
+        with db.connect(LOCAL_DB) as conn:
             journal_tuples = conn.execute(
-                                        "select * from journal_prod order by date"
+                                        "select * from journal_view order by date"
                                         ).fetchall()
 
         journal = journal_calendar(journal_tuples)

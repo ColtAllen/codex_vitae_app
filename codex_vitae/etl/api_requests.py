@@ -41,7 +41,7 @@ def authenticate_gmail_api(credentials):
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
                 credentials, SCOPE)
-            creds = flow.run_local_server(port=0)
+            creds = flow.run_local_server(port=50683)
         # Save the credentials for the next run
         with closing(open('token.json', 'w')) as token:
             token.write(creds.to_json())

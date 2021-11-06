@@ -18,7 +18,6 @@ from text_processing import reMarkableParsing, fitness_parsing, nutrition_parsin
 
 # Configure Environment Variables.
 DATA_DIR = os.getenv('DATA_DIR')
-CRED_DIR = os.getenv('CRED_DIR')
 CRED = os.getenv('CRED')
 API_KEY = os.getenv('API_KEY')
 
@@ -182,8 +181,6 @@ if __name__ == '__main__':
     _bullet_journal = list(_bullet_journal.itertuples(index=False,name=None))
 
     # Perform API calls for production data.
-    os.chdir(CRED_DIR)
-
     # GMail API calls only return 100 results, so multiple calls must be made and appended together
     date1_ = str(datetime.date(2021, 5, 1))
     date2_ = str(datetime.date(2021, 7, 28))
@@ -194,8 +191,10 @@ if __name__ == '__main__':
         _remarkable = get_email_content(service,query=f"from:my@remarkable.com,before:{date1_}")
         _remarkable1 = get_email_content(service,query=f"from:my@remarkable.com,after:{date1_},before:{date2_}")
         _remarkable2 = get_email_content(service,query=f"from:my@remarkable.com,after:{date2_}")
+        _remarkable3 = get_email_content(service,query=f"from:my@remarkable.com,after:{date3_}")
         _remarkable.extend(_remarkable1)
         _remarkable.extend(_remarkable2)
+        _remarkable.extend(_remarkable3)
         _mynetdiary = get_email_content(service,query=f"from:no-reply@mynetdiary.net")
     
     _rescuetime = get_rescuetime_daily(API_KEY)
@@ -259,9 +258,9 @@ if __name__ == '__main__':
             """
 
     # Read backfill files for RescueTime, Journal, and Fitness
-    updt_rsctm = [(day,p,d,n) for (day,p,d,n) in json.load(open('../data/rt_backfill.json', 'r'))]
-    updte_jrnl = [(mood,entry,day) for (mood,entry,day) in json.load(open('../data/journal_backfill.json', 'r'))]
-    updt_ftnss = [(p,s,ds,ls,rs,a,ds,c,day) for (p,s,ds,ls,rs,a,ds,c,day) in json.load(open('../data/fitness_backfill.json', 'r'))]
+    updt_rsctm = [(day,p,d,n) for (day,p,d,n) in json.load(open('rt_backfill.json', 'r'))]
+    updte_jrnl = [(mood,entry,day) for (mood,entry,day) in json.load(open('journal_backfill.json', 'r'))]
+    updt_ftnss = [(p,s,ds,ls,rs,a,ds,c,day) for (p,s,ds,ls,rs,a,ds,c,day) in json.load(open('fitness_backfill.json', 'r'))]
 
     cur.executemany(rsctm_update,updt_rsctm)
     cur.executemany(jrnl_update,updte_jrnl)
