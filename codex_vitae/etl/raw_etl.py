@@ -183,15 +183,15 @@ if __name__ == '__main__':
     # Perform API calls for production data.
     # GMail API calls only return 100 results, so multiple calls must be made and appended together
     date1_ = str(datetime.date(2021, 5, 1))
-    date2_ = str(datetime.date(2021, 7, 28))
+    date2_ = str(datetime.date(2021, 7, 18))
     date3_ = str(datetime.date(2021, 10, 25))
     date4_ = str(datetime.date(2022, 1, 18))
     
     with closing(authenticate_gmail_api(CRED)) as service:
         _remarkable = get_email_content(service,query=f"from:my@remarkable.com,before:{date1_}")
         _remarkable1 = get_email_content(service,query=f"from:my@remarkable.com,after:{date1_},before:{date2_}")
-        _remarkable2 = get_email_content(service,query=f"from:my@remarkable.com,after:{date2_}")
-        _remarkable3 = get_email_content(service,query=f"from:my@remarkable.com,after:{date3_}")
+        _remarkable2 = get_email_content(service,query=f"from:my@remarkable.com,after:{date2_},before:{date3_}")
+        _remarkable3 = get_email_content(service,query=f"from:my@remarkable.com,after:{date3_},before:{date4_}")
         _remarkable.extend(_remarkable1)
         _remarkable.extend(_remarkable2)
         _remarkable.extend(_remarkable3)
